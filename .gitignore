@@ -1,0 +1,12 @@
+# clasp 個人設定
+.clasp.json
+node_modules/
+__pycache__/
+.DS_Store
+
+# 個人財務資料（不進版控）
+import_data/*
+!import_data/.gitkeep
+data/*
+!data/.gitkeep
+preview/
