@@ -58,20 +58,33 @@ open preview/index.html          # macOS
 
 需先安裝 [clasp](https://github.com/google/clasp)：`npm install -g @google/clasp`
 
-1. **建立試算表**：新建一個 Google Sheet。
-2. **匯入資料**：在該 Sheet 中
-   - 建立工作表 `Transactions`，`檔案 → 匯入 → 上傳 data/transactions.csv`，匯入位置選「取代目前工作表」。
-   - 建立工作表 `Accounts`，同樣匯入 `data/accounts.csv`。
-3. **建立繫結腳本**：在 Sheet 選 `擴充功能 → Apps Script`，會開啟一個繫結此試算表的專案。
-4. **取得 scriptId**：Apps Script 專案 `專案設定 → 指令碼 ID`，複製它。
-5. **設定 clasp**：
-   ```bash
-   clasp login
-   cp .clasp.json.example .clasp.json     # 把 scriptId 填進去
-   clasp push                              # 上傳 src/ 內的檔案
-   ```
-6. **部署為 Web App**：Apps Script → `部署 → 新增部署 → 類型選「網頁應用程式」`，
-   執行身分＝自己、存取權＝僅限自己，部署後即得專屬網址。
+1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "個人資產變化紀錄"`
+   會一次建立「一張新試算表 + 繫結它的 Apps Script 專案」，並產生 `.clasp.json`。
+   把 `.clasp.json` 的 `rootDir` 改成 `"src"`（clasp 產生的暫存資料夾可刪除）。
+2. **上傳程式**：`clasp login` 後 `clasp push --force`（上傳 `src/` 內的檔案）。
+3. **匯入資料**：兩種方式擇一
+   - **（推薦）部署後直接在網頁上傳** `source.plist`（見下方「更新資料」），連工作表都會自動建立。
+   - 或先手動把 `data/transactions.csv`、`data/accounts.csv` 匯入試算表，
+     工作表名稱需為 `Transactions`、`Accounts`。
+4. **部署為 Web App**：`clasp create-deployment`（或在編輯器 `部署 → 新增部署 → 網頁應用程式`）。
+   - 執行身分＝**部署者（你）**；存取權依需求設定（見下方「存取控制」）。
+   - 更新後用 `clasp update-deployment <deploymentId>` 重新部署到同一網址。
+
+### 存取控制與通關密碼
+
+`appsscript.json` 的 `webapp.access` 決定誰能開啟頁面：
+
+- `MYSELF`：只有你。最安全。
+- `ANYONE_ANONYMOUS`：任何人有網址即可開啟（免登入）。
+
+本專案採「**頁面公開、資料需通關密碼**」：`access` 設為 `ANYONE_ANONYMOUS`，
+但後端 `getDashboardData` / `importData` 都要求正確密碼才回傳/寫入資料（**fail-closed**，
+未設密碼或密碼錯誤一律拒絕），前端進入時先顯示密碼畫面。
+
+**設定密碼**（務必先設，否則連你自己都看不到資料）：
+Apps Script 編輯器 → `專案設定 ⚙️ → 指令碼屬性` → 新增屬性 `ACCESS_CODE` = 你的密碼。
+（或執行 `Code.gs` 的 `setAccessCode()`，把其中的 `'change-me'` 先改成你的密碼。）
+密碼只存在指令碼屬性，**不寫進程式碼、不進版控**；要改密碼或停權就改這個屬性值。
 
 ### 4. 更新資料
 
@@ -93,7 +106,7 @@ open preview/index.html          # macOS
 | `tools/make_preview.js` | 產生本機預覽 `preview/index.html` |
 | `data/*.csv` | 匯入 Google Sheet 用的資料 |
 | `src/Ledger.gs` | 借貸與各月餘額計算引擎（伺服器端純函式） |
-| `src/Code.gs` | Web App 進入點、`include()`、讀取/寫入試算表、`importData`、快取 |
+| `src/Code.gs` | Web App 進入點、`include()`、讀寫試算表、`importData`、通關密碼檢查、快取 |
 | `src/index.html` | 前端骨架，以 `include()` 組入下列分層 |
 | `src/View_Styles.html` | 樣式（CSS） |
 | `src/Model.html` | 前端 Model：領域資料與純計算 |
