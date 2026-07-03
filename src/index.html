@@ -33,6 +33,7 @@
       <div class="tabs">
         <button class="tab active" data-view="trend">📈 淨值趨勢</button>
         <button class="tab" data-view="composition">🥧 資產組成</button>
+        <button class="tab" data-view="monthly">📅 月度收支</button>
         <button class="tab" data-view="yearly">📊 年度收支</button>
       </div>
 
@@ -78,6 +79,22 @@
         <div class="card">
           <h2>該月各資產明細</h2>
           <div id="compTable"></div>
+        </div>
+      </section>
+
+      <!-- 月度收支 -->
+      <section id="view-monthly" class="hidden">
+        <div class="card">
+          <h2>月度收入 / 支出 / 淨結餘</h2>
+          <p class="hint">選擇年份，檢視該年各月收支</p>
+          <div class="controls">
+            <label>年份</label><select id="monthlyYear"></select>
+          </div>
+          <div id="monthlyChart" class="chart tall"></div>
+        </div>
+        <div class="card">
+          <h2>各月數字</h2>
+          <div id="monthlyTable"></div>
         </div>
       </section>
 

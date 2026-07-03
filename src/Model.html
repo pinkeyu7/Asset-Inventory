@@ -18,6 +18,18 @@ App.Model = (function () {
   function lastMonth() { return D.months[D.months.length - 1]; }
   function yearly() { return D.yearly; }
 
+  // 某年各月收支：回傳 [{month:'YYYY-MM', mm:'01', income, expense, net}]（依月份升冪）
+  function monthlyByYear(year) {
+    var pts = [];
+    for (var i = 0; i < D.months.length; i++) {
+      if (D.months[i].split('-')[0] === String(year)) {
+        var f = (D.monthly && D.monthly[i]) || { income: 0, expense: 0, net: 0 };
+        pts.push({ month: D.months[i], mm: D.months[i].split('-')[1], income: f.income, expense: f.expense, net: f.net });
+      }
+    }
+    return pts;
+  }
+
   function shortName(full) {
     return (D.accountMeta[full] && D.accountMeta[full].short) || full.replace(/^[A-Z]-/, '');
   }
@@ -107,7 +119,7 @@ App.Model = (function () {
     months: months, monthCount: monthCount, txnCount: txnCount, generatedAt: generatedAt,
     firstMonth: firstMonth, lastMonth: lastMonth, yearly: yearly, shortName: shortName,
     nowIndex: nowIndex, distinctYears: distinctYears, nowYear: nowYear,
-    kpis: kpis, trendSeries: trendSeries, composition: composition
+    kpis: kpis, trendSeries: trendSeries, composition: composition, monthlyByYear: monthlyByYear
   };
 })();
 </script>

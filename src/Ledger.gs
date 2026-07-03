@@ -109,22 +109,30 @@ function buildTimeSeries(txns) {
     totals.push({ assets: round2(sumA), liabilities: round2(sumL), networth: round2(sumA - sumL) });
   }
 
-  // 4) 年度收支（依交易年份彙總 I / E 的正常餘額變化）
-  var yearlyMap = {}; // year -> {income, expense}
+  // 4) 年度 / 月度收支（依交易時間彙總 I / E 的正常餘額變化）
+  var yearlyMap = {};   // year     -> {income, expense}
+  var monthlyMap = {};  // 'YYYY-MM'-> {income, expense}
   for (var k = 0; k < txns.length; k++) {
     var tx = txns[k];
-    var year = String(tx.month).split('-')[0];
+    var mo = String(tx.month);
+    var year = mo.split('-')[0];
     if (!yearlyMap[year]) yearlyMap[year] = { income: 0, expense: 0 };
+    if (!monthlyMap[mo]) monthlyMap[mo] = { income: 0, expense: 0 };
     var dc2 = debitCredit(tx);
     var a2 = Number(tx.amount) || 0;
     // 收入帳戶（貸方正常）：出現在貸方即為收入實現
-    if (typeOf(dc2.credit) === 'I') yearlyMap[year].income += a2;
+    if (typeOf(dc2.credit) === 'I') { yearlyMap[year].income += a2; monthlyMap[mo].income += a2; }
     // 支出帳戶（借方正常）：出現在借方即為支出發生
-    if (typeOf(dc2.debit) === 'E') yearlyMap[year].expense += a2;
+    if (typeOf(dc2.debit) === 'E') { yearlyMap[year].expense += a2; monthlyMap[mo].expense += a2; }
   }
   var yearly = Object.keys(yearlyMap).sort().map(function (y) {
     var o = yearlyMap[y];
     return { year: y, income: round2(o.income), expense: round2(o.expense), net: round2(o.income - o.expense) };
+  });
+  // 與 months 對齊（無交易的月份為 0）
+  var monthly = months.map(function (m) {
+    var o = monthlyMap[m] || { income: 0, expense: 0 };
+    return { income: round2(o.income), expense: round2(o.expense), net: round2(o.income - o.expense) };
   });
 
   return {
@@ -133,6 +141,7 @@ function buildTimeSeries(txns) {
     assetSeries: assetSeries,
     liabilitySeries: liabilitySeries,
     yearly: yearly,
+    monthly: monthly,
     accountBalances: running
   };
 }

@@ -14,15 +14,17 @@ App.ViewModel = (function () {
   function emit(evt, payload) { (subs[evt] || []).forEach(function (fn) { fn(payload); }); }
 
   var state = {
-    activeView: 'trend',                                             // trend | composition | yearly
+    activeView: 'trend',                                             // trend | composition | monthly | yearly
     trend: { granularity: 'month', presetMonths: 36, start: null, end: null },
-    composition: { monthIndex: 0 }
+    composition: { monthIndex: 0 },
+    monthly: { year: null }
   };
 
   // 資料就緒後呼叫：設定各項預設
   function init() {
     applyPreset(36);                             // 預設近3年（月顆粒度）
     state.composition.monthIndex = M.monthCount() - 1;
+    state.monthly.year = String(M.nowYear());    // 月度收支預設今年
   }
 
   // ---- 命令 ----
@@ -73,6 +75,11 @@ App.ViewModel = (function () {
     emit('compositionChanged', idx);
   }
 
+  function setMonthlyYear(year) {
+    state.monthly.year = String(year);
+    emit('monthlyChanged', state.monthly.year);
+  }
+
   // ---- 給 View 讀的 computed ----
   function activeView() { return state.activeView; }
   function trend() { return state.trend; }
@@ -80,13 +87,16 @@ App.ViewModel = (function () {
   function kpis() { return M.kpis(); }
   function compositionData() { return M.composition(state.composition.monthIndex); }
   function yearlyData() { return M.yearly(); }
+  function monthlyYear() { return state.monthly.year; }
+  function monthlyData() { return M.monthlyByYear(state.monthly.year); }
 
   return {
     on: on, init: init,
     setActiveView: setActiveView, setGranularity: setGranularity, applyPreset: applyPreset,
-    setRange: setRange, setCompositionMonth: setCompositionMonth,
+    setRange: setRange, setCompositionMonth: setCompositionMonth, setMonthlyYear: setMonthlyYear,
     activeView: activeView, trend: trend, trendData: trendData, kpis: kpis,
-    compositionData: compositionData, yearlyData: yearlyData
+    compositionData: compositionData, yearlyData: yearlyData,
+    monthlyYear: monthlyYear, monthlyData: monthlyData
   };
 })();
 </script>
