@@ -75,6 +75,12 @@ open preview/index.html          # macOS
 
 ### 4. 更新資料
 
+**最簡單：在網頁上傳**（部署後）
+直接開啟網頁應用程式 → 點右上角「⬆️ 上傳 source.plist」→ 選檔。
+瀏覽器會在前端解析 plist、送到後端寫入 `Transactions`/`Accounts` 工作表、
+清快取並自動重繪，無需手動跑 `convert.py` 或匯入 CSV。
+
+**或用離線流程**
 覆蓋 `source.plist` → 跑 `convert.py` → 重新匯入兩個工作表 → 在試算表選單
 `資產儀表板 → 清除快取`（或等 6 小時快取自動過期）→ 重新整理網頁。
 
@@ -87,10 +93,11 @@ open preview/index.html          # macOS
 | `tools/make_preview.js` | 產生本機預覽 `preview/index.html` |
 | `data/*.csv` | 匯入 Google Sheet 用的資料 |
 | `src/Ledger.gs` | 借貸與各月餘額計算引擎（伺服器端純函式） |
-| `src/Code.gs` | Web App 進入點、`include()`、讀取試算表、快取 |
+| `src/Code.gs` | Web App 進入點、`include()`、讀取/寫入試算表、`importData`、快取 |
 | `src/index.html` | 前端骨架，以 `include()` 組入下列分層 |
 | `src/View_Styles.html` | 樣式（CSS） |
 | `src/Model.html` | 前端 Model：領域資料與純計算 |
+| `src/Importer.html` | 前端 Model：解析 plist → 列陣列（與 `convert.py` 同結果） |
 | `src/ViewModel.html` | 前端 ViewModel：畫面狀態、命令、可觀察通知 |
 | `src/View.html` | 前端 View：DOM 綁定、Google Charts、事件轉發 |
 | `src/appsscript.json` | GAS 專案設定 |

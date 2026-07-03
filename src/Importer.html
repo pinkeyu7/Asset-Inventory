@@ -1,0 +1,114 @@
+<script>
+// ============================================================
+// Importer（Model 層）—— 解析記帳 App 的 XML plist，
+//   轉成可寫入試算表的列陣列（與 tools/convert.py 產出相同）。
+//   純字串處理，不依賴 DOMParser，瀏覽器與 Node 皆可執行。
+// ============================================================
+window.App = window.App || {};
+App.Importer = (function () {
+
+  function decodeEntities(s) {
+    return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+            .replace(/&#(\d+);/g, function (_, d) { return String.fromCharCode(+d); })
+            .replace(/&amp;/g, '&');
+  }
+
+  function tokenize(xml) {
+    xml = xml.replace(/<\?xml[\s\S]*?\?>/, '').replace(/<!DOCTYPE[\s\S]*?>/, '');
+    // 標籤可含屬性（如 <plist version="1.0">）：自封閉優先，其次開/關標籤，最後文字
+    var re = /<(\w+)(?:\s[^>]*?)?\/>|<(\w+)(?:\s[^>]*?)?>|<\/(\w+)>|([^<]+)/g, m, toks = [];
+    while ((m = re.exec(xml))) {
+      if (m[1] !== undefined) toks.push({ t: 'self', name: m[1] });
+      else if (m[2] !== undefined) toks.push({ t: 'open', name: m[2] });
+      else if (m[3] !== undefined) toks.push({ t: 'close', name: m[3] });
+      else toks.push({ t: 'text', text: m[4] });
+    }
+    return toks;
+  }
+
+  // 將 plist XML 解析為 JS 物件（dict→object、array→array、scalar→值）
+  function parse(xml) {
+    var toks = tokenize(xml), i = 0;
+    function skipWs() { while (i < toks.length && toks[i].t === 'text' && !toks[i].text.trim()) i++; }
+    function parseValue() {
+      skipWs();
+      var tk = toks[i++];
+      if (!tk) return null;
+      if (tk.t === 'self') { if (tk.name === 'true') return true; if (tk.name === 'false') return false; return null; }
+      if (tk.t !== 'open') return null;
+      var name = tk.name;
+      if (name === 'dict') {
+        var obj = {};
+        while (true) {
+          skipWs();
+          var t2 = toks[i];
+          if (!t2 || (t2.t === 'close' && t2.name === 'dict')) { i++; break; }
+          i++;                                   // 消耗 <key>
+          var keyText = '';
+          while (i < toks.length && toks[i].t === 'text') { keyText += toks[i].text; i++; }
+          if (toks[i] && toks[i].t === 'close') i++;   // 消耗 </key>
+          obj[decodeEntities(keyText)] = parseValue();
+        }
+        return obj;
+      }
+      if (name === 'array') {
+        var arr = [];
+        while (true) {
+          skipWs();
+          var t3 = toks[i];
+          if (!t3 || (t3.t === 'close' && t3.name === 'array')) { i++; break; }
+          arr.push(parseValue());
+        }
+        return arr;
+      }
+      // 純量：收集文字到 close 標籤
+      var txt = '';
+      while (i < toks.length && toks[i].t === 'text') { txt += toks[i].text; i++; }
+      if (toks[i] && toks[i].t === 'close') i++;
+      txt = decodeEntities(txt);
+      if (name === 'integer') return parseInt(txt, 10);
+      if (name === 'real') return parseFloat(txt);
+      return txt;                                // string / date / data
+    }
+    while (i < toks.length && !(toks[i].t === 'open' && toks[i].name === 'plist')) i++;
+    if (i < toks.length) i++;                    // 消耗 <plist>
+    return parseValue();
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+  // 解析並轉成 {transactions:[[...]], accounts:[[...]]}（皆含表頭列）
+  function plistToRows(xml) {
+    var root = parse(xml);
+    if (!root || (!root.MainData && !root.Accounts)) {
+      throw new Error('不是有效的記帳 plist（缺少 MainData / Accounts）');
+    }
+    var accounts = root.Accounts || [], main = root.MainData || [];
+
+    var accRows = [['FullName', 'Type', 'TypeNote', 'ShortName', 'Active']];
+    accounts.forEach(function (a) {
+      var short = a.Name || '';
+      var typ = String(a.Type || '').replace(/-/g, '').charAt(0) || '';
+      accRows.push([typ + '-' + short, typ, a.TypeNote || '', short, a.State ? '1' : '0']);
+    });
+
+    var tmp = [];
+    main.forEach(function (t) {
+      var iso = '', month = '';
+      if (t.Date) {
+        var dt = new Date(t.Date);                // plist 為 UTC(Z)，以 UTC 取值對齊 convert.py
+        iso = dt.getUTCFullYear() + '-' + pad2(dt.getUTCMonth() + 1) + '-' + pad2(dt.getUTCDate()) +
+              'T' + pad2(dt.getUTCHours()) + ':' + pad2(dt.getUTCMinutes()) + ':' + pad2(dt.getUTCSeconds());
+        month = dt.getUTCFullYear() + '-' + pad2(dt.getUTCMonth() + 1);
+      }
+      tmp.push([iso, month, t.Account1 || '', t.Account2 || '', Number(t.Amount) || 0, t.Note1 || '', t.Note2 || '']);
+    });
+    tmp.sort(function (a, b) { return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0); });
+
+    return { transactions: [['Date', 'Month', 'Account1', 'Account2', 'Amount', 'Note1', 'Note2']].concat(tmp), accounts: accRows };
+  }
+
+  return { parse: parse, plistToRows: plistToRows };
+})();
+</script>

@@ -209,19 +209,30 @@
     VM.on('compositionChanged', function () { renderComposition(); });
   }
 
-  // ---------- 啟動 ----------
+  // ---------- 啟動 / 重載 ----------
+  var pendingData = null;
+
   function showError(msg) {
     $('loading').classList.add('hidden');
     var el = $('error'); el.classList.remove('hidden'); el.className = 'err';
     el.textContent = '載入失敗：' + msg;
   }
+  function showEmpty() {
+    $('loading').classList.add('hidden');
+    $('app').classList.add('hidden');
+    var el = $('error'); el.classList.remove('hidden'); el.className = 'note';
+    el.textContent = '尚無資料。請點右上角「⬆️ 上傳 source.plist」匯入你的記帳檔。';
+  }
 
-  function tryStart() {
-    if (started || !chartsReady || !dataReady) return;
-    if (M.isEmpty()) { showError('沒有交易資料，請確認已匯入 Transactions 工作表'); return; }
-    started = true;
+  // 載入資料到 Model 並完整重繪（初次載入與上傳後重載共用）
+  function loadAndRender(data) {
+    M.load(data);
+    if (M.isEmpty()) { showEmpty(); return; }
+    $('error').classList.add('hidden');
     $('loading').classList.add('hidden');
     $('app').classList.remove('hidden');
+    populateRangeOptions(VM.trend().granularity);  // 先建選項，VM.init 的 rangeChanged 才能同步值
+    VM.init();
     $('meta').textContent = M.txnCount() + ' 筆交易 · ' + M.firstMonth() + ' ～ ' + M.lastMonth() + ' · 更新於 ' + M.generatedAt();
     var slider = $('monthSlider');
     slider.max = M.monthCount() - 1;
@@ -232,18 +243,61 @@
     renderYearly();
   }
 
-  function onData(data) {
-    M.load(data);
-    if (M.isEmpty()) { dataReady = true; showError('沒有交易資料，請確認已匯入 Transactions 工作表'); return; }
-    populateRangeOptions(VM.trend().granularity);  // 先建選項，VM.init 的 rangeChanged 才能同步值
-    VM.init();
-    dataReady = true;
-    tryStart();
+  function tryStart() {
+    if (started || !chartsReady || !dataReady) return;
+    started = true;
+    loadAndRender(pendingData);
+  }
+  function onData(data) { pendingData = data; dataReady = true; tryStart(); }
+
+  // ---------- 上傳 source.plist ----------
+  function setUploadStatus(msg, isErr) {
+    var el = $('uploadStatus'); el.textContent = msg;
+    el.style.color = isErr ? cssVar('--liab') : cssVar('--muted');
+  }
+  function wireUpload() {
+    var btn = $('uploadBtn'), input = $('plistFile');
+    if (!btn || !input) return;
+    btn.onclick = function () { input.click(); };
+    input.onchange = function () {
+      var f = input.files && input.files[0];
+      input.value = '';                 // 允許重選同一檔
+      if (!f) return;
+      setUploadStatus('讀取「' + f.name + '」…');
+      var reader = new FileReader();
+      reader.onerror = function () { setUploadStatus('❌ 讀檔失敗', true); };
+      reader.onload = function () {
+        var rows;
+        try { rows = App.Importer.plistToRows(reader.result); }
+        catch (e) { setUploadStatus('❌ 解析失敗：' + e.message, true); return; }
+        var nT = rows.transactions.length - 1, nA = rows.accounts.length - 1;
+        if (!window.google || !google.script || !google.script.run) {   // 本機預覽無後端
+          setUploadStatus('已解析 ' + nT + ' 筆交易、' + nA + ' 個帳戶（預覽模式不寫入，請於 GAS 網頁使用）');
+          return;
+        }
+        setUploadStatus('已解析 ' + nT + ' 筆交易，寫入試算表中…');
+        btn.disabled = true;
+        google.script.run
+          .withSuccessHandler(function (fresh) {
+            btn.disabled = false;
+            setUploadStatus('✅ 匯入完成：' + nT + ' 筆交易、' + nA + ' 個帳戶');
+            started = true;
+            loadAndRender(fresh);
+          })
+          .withFailureHandler(function (e) {
+            btn.disabled = false;
+            setUploadStatus('❌ 寫入失敗：' + (e && e.message ? e.message : e), true);
+          })
+          .importData(rows);
+      };
+      reader.readAsText(f);
+    };
   }
 
   function boot() {
     wireEvents();
     wireSubscriptions();
+    wireUpload();
     google.charts.load('current', { packages: ['corechart'] });
     google.charts.setOnLoadCallback(function () { chartsReady = true; tryStart(); });
 

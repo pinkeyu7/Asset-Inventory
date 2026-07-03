@@ -21,6 +21,14 @@
   header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
   h1 { font-size: 20px; margin: 0; font-weight: 700; }
   .sub { color: var(--muted); font-size: 12px; }
+  .upload { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .upload-btn {
+    border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600;
+  }
+  .upload-btn:hover { opacity: .9; }
+  .upload-btn:disabled { opacity: .5; cursor: default; }
+  .upload-status { font-size: 12px; color: var(--muted); }
 
   .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
   .tab {
@@ -69,6 +77,7 @@
   .hidden { display: none; }
   .loading { text-align: center; color: var(--muted); padding: 60px 0; }
   .err { color: var(--liab); background: var(--card); border: 1px solid var(--liab); border-radius: 12px; padding: 16px; }
+  .note { color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
   th:first-child, td:first-child { text-align: left; }

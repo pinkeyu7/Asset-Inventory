@@ -12,6 +12,11 @@
         <h1>個人資產變化紀錄</h1>
         <div class="sub" id="meta"></div>
       </div>
+      <div class="upload">
+        <input type="file" id="plistFile" accept=".plist,.xml,text/xml" hidden>
+        <button class="upload-btn" id="uploadBtn">⬆️ 上傳 source.plist</button>
+        <span class="upload-status" id="uploadStatus"></span>
+      </div>
     </header>
 
     <div id="loading" class="loading"><div class="spin"></div><div style="margin-top:10px">載入資料中…</div></div>
@@ -86,6 +91,7 @@
   <!--PRELOADED_DATA-->
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <?!= include('Model') ?>
+  <?!= include('Importer') ?>
   <?!= include('ViewModel') ?>
   <?!= include('View') ?>
 </body>

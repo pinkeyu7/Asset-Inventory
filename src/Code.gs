@@ -108,6 +108,35 @@ function getDashboardData() {
   return result;
 }
 
+/**
+ * 前端上傳 source.plist 解析後呼叫：把資料寫入 Transactions / Accounts 工作表，
+ * 清快取並回傳最新的儀表板資料。
+ * @param {{transactions: Array<Array>, accounts: Array<Array>}} payload  皆含表頭列
+ */
+function importData(payload) {
+  if (!payload || !payload.transactions || !payload.transactions.length) {
+    throw new Error('沒有可匯入的交易資料');
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  writeSheet_(ss, TX_SHEET, payload.transactions);
+  writeSheet_(ss, ACC_SHEET, payload.accounts || []);
+  clearCache();
+  return getDashboardData();
+}
+
+/** 以列陣列覆寫指定工作表（不存在則新建）；Month 欄設為純文字避免被轉成日期。 */
+function writeSheet_(ss, name, rows) {
+  var sh = ss.getSheetByName(name);
+  if (!sh) sh = ss.insertSheet(name);
+  sh.clearContents();
+  if (!rows || !rows.length) return;
+  var range = sh.getRange(1, 1, rows.length, rows[0].length);
+  if (name === TX_SHEET) {
+    sh.getRange(1, 1, rows.length, 2).setNumberFormat('@');   // Date、Month 兩欄以文字保存
+  }
+  range.setValues(rows);
+}
+
 /** 匯入或更新資料後，於試算表選單手動清除快取用。 */
 function clearCache() {
   CacheService.getUserCache().remove(CACHE_KEY);
