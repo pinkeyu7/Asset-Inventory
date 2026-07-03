@@ -12,12 +12,17 @@ var ACC_SHEET = 'Accounts';
 var CACHE_KEY = 'timeseries_v1';
 var CACHE_TTL = 21600; // 6 小時
 
-/** Web App 進入點 */
+/** Web App 進入點（index 為模板，會以 include() 組入 Styles/Model/ViewModel/View） */
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('index')
+  return HtmlService.createTemplateFromFile('index').evaluate()
     .setTitle('個人資產變化紀錄')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/** 供 index.html 以 <?!= include('檔名') ?> 組入其他 HTML 檔（MVVM 分層）。 */
+function include(name) {
+  return HtmlService.createHtmlOutputFromFile(name).getContent();
 }
 
 /** 讀取工作表為物件陣列（以第一列為欄位名）。 */

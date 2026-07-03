@@ -1,0 +1,92 @@
+<script>
+// ============================================================
+// ViewModel —— 畫面狀態 + 命令 + 可觀察通知（不碰 DOM）
+//   View 透過 on() 訂閱狀態變化；使用者操作透過命令進來，
+//   ViewModel 更新 state 後 emit 事件通知 View 重繪。
+// ============================================================
+window.App = window.App || {};
+App.ViewModel = (function () {
+  var M = App.Model;
+
+  // 極簡 observable
+  var subs = {};
+  function on(evt, fn) { (subs[evt] = subs[evt] || []).push(fn); }
+  function emit(evt, payload) { (subs[evt] || []).forEach(function (fn) { fn(payload); }); }
+
+  var state = {
+    activeView: 'trend',                                             // trend | composition | yearly
+    trend: { granularity: 'month', presetMonths: 36, start: null, end: null },
+    composition: { monthIndex: 0 }
+  };
+
+  // 資料就緒後呼叫：設定各項預設
+  function init() {
+    applyPreset(36);                             // 預設近3年（月顆粒度）
+    state.composition.monthIndex = M.monthCount() - 1;
+  }
+
+  // ---- 命令 ----
+  function setActiveView(v) {
+    if (state.activeView === v) return;
+    state.activeView = v;
+    emit('activeViewChanged', v);
+  }
+
+  function setGranularity(g) {
+    if (state.trend.granularity === g) return;
+    state.trend.granularity = g;
+    emit('granularityChanged', g);               // View 重建起/迄選項
+    applyPreset(state.trend.presetMonths || 36); // 依新顆粒度沿用區間長度
+  }
+
+  function applyPreset(months) {
+    state.trend.presetMonths = months;
+    var g = state.trend.granularity;
+    if (g === 'year') {
+      var ys = M.distinctYears();
+      if (months === 0) { state.trend.start = ys[0]; state.trend.end = ys[ys.length - 1]; }
+      else {
+        var ny = M.nowYear(), back = Math.round(months / 12);
+        state.trend.end = String(ny);
+        state.trend.start = String(Math.max(parseInt(ys[0], 10), ny - (back - 1)));
+      }
+    } else {
+      var n = M.monthCount();
+      if (months === 0) { state.trend.start = 0; state.trend.end = n - 1; }
+      else { var ni = M.nowIndex(); state.trend.end = ni; state.trend.start = Math.max(0, ni - months); }
+    }
+    emit('rangeChanged', { start: state.trend.start, end: state.trend.end, presetMonths: months });
+    emit('trendChanged');
+  }
+
+  // 手動指定起/迄（View 已先做過起≤迄的修正），清除快捷選取
+  function setRange(start, end) {
+    state.trend.start = start;
+    state.trend.end = end;
+    state.trend.presetMonths = null;
+    emit('rangeChanged', { start: start, end: end, presetMonths: null });
+    emit('trendChanged');
+  }
+
+  function setCompositionMonth(idx) {
+    state.composition.monthIndex = idx;
+    emit('compositionChanged', idx);
+  }
+
+  // ---- 給 View 讀的 computed ----
+  function activeView() { return state.activeView; }
+  function trend() { return state.trend; }
+  function trendData() { return M.trendSeries(state.trend.granularity, state.trend.start, state.trend.end); }
+  function kpis() { return M.kpis(); }
+  function compositionData() { return M.composition(state.composition.monthIndex); }
+  function yearlyData() { return M.yearly(); }
+
+  return {
+    on: on, init: init,
+    setActiveView: setActiveView, setGranularity: setGranularity, applyPreset: applyPreset,
+    setRange: setRange, setCompositionMonth: setCompositionMonth,
+    activeView: activeView, trend: trend, trendData: trendData, kpis: kpis,
+    compositionData: compositionData, yearlyData: yearlyData
+  };
+})();
+</script>

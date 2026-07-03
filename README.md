@@ -14,8 +14,19 @@ data/accounts.csv + data/transactions.csv
 Google Sheet（Transactions / Accounts 兩個工作表）＝ 資料庫
         │  src/Code.gs 讀取 → src/Ledger.gs 計算借貸與各月餘額
         ▼
-Web App（src/index.html，Google Charts）＝ 儀表板
+Web App（HtmlService + Google Charts）＝ 儀表板，前端採 MVVM 分層
 ```
+
+### 前端 MVVM 架構
+
+`index.html` 只是骨架，透過 GAS 模板 `<?!= include('檔名') ?>` 組入各分層檔案：
+
+- **Model**（`Model.html`）— 領域資料與純計算（KPI、趨勢序列、資產組成…），不碰 DOM/圖表。
+- **ViewModel**（`ViewModel.html`）— 畫面狀態 + 命令 + 可觀察通知；使用者操作進來、更新狀態後 emit 事件。
+- **View**（`View.html`）— 只綁 DOM、畫 Google Charts、把操作轉發給 ViewModel，訂閱其事件重繪。
+- **Styles**（`View_Styles.html`）— 樣式。
+
+資料載入有兩條路：GAS 版走 `google.script.run.getDashboardData()`；本機預覽走 `window.PRELOADED_DATA`（由 `make_preview.js` 注入）。
 
 本機也可**免部署預覽**：`tools/make_preview.js` 會用真實資料產生 `preview/index.html`。
 
@@ -75,7 +86,11 @@ open preview/index.html          # macOS
 | `tools/convert.py` | plist → CSV，含恆等式驗證 |
 | `tools/make_preview.js` | 產生本機預覽 `preview/index.html` |
 | `data/*.csv` | 匯入 Google Sheet 用的資料 |
-| `src/Ledger.gs` | 借貸與各月餘額計算引擎（純函式） |
-| `src/Code.gs` | Web App 進入點、讀取試算表、快取 |
-| `src/index.html` | 前端儀表板（三個畫面 + Google Charts） |
+| `src/Ledger.gs` | 借貸與各月餘額計算引擎（伺服器端純函式） |
+| `src/Code.gs` | Web App 進入點、`include()`、讀取試算表、快取 |
+| `src/index.html` | 前端骨架，以 `include()` 組入下列分層 |
+| `src/View_Styles.html` | 樣式（CSS） |
+| `src/Model.html` | 前端 Model：領域資料與純計算 |
+| `src/ViewModel.html` | 前端 ViewModel：畫面狀態、命令、可觀察通知 |
+| `src/View.html` | 前端 View：DOM 綁定、Google Charts、事件轉發 |
 | `src/appsscript.json` | GAS 專案設定 |

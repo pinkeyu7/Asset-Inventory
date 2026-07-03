@@ -1,0 +1,262 @@
+<script>
+// ============================================================
+// View —— DOM 綁定、Google Charts 繪製、事件轉發（不含商業邏輯）
+//   訂閱 ViewModel 的事件來重繪；把使用者操作轉成 ViewModel 命令。
+// ============================================================
+(function () {
+  var VM = App.ViewModel, M = App.Model;
+  var chartsReady = false, dataReady = false, started = false;
+
+  // ---------- 呈現層工具 ----------
+  function $(id) { return document.getElementById(id); }
+  function cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function fmtFull(n) { return 'NT$ ' + Math.round(n).toLocaleString('en-US'); }
+  function fmtWan(n) {
+    var abs = Math.abs(n);
+    if (abs >= 1e8) return (n / 1e8).toFixed(2) + ' 億';
+    if (abs >= 1e4) return (n / 1e4).toFixed(n >= 1e6 ? 0 : 1) + ' 萬';
+    return Math.round(n).toLocaleString('en-US');
+  }
+  function baseOptions() {
+    var muted = cssVar('--muted'), grid = cssVar('--border');
+    return {
+      backgroundColor: 'transparent',
+      chartArea: { left: 64, right: 16, top: 20, bottom: 44, width: '100%', height: '100%' },
+      legend: { position: 'none' },
+      fontName: '-apple-system, PingFang TC, sans-serif',
+      hAxis: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: 'transparent' } },
+      vAxis: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: grid, count: 5 }, baselineColor: grid, format: 'short' },
+      tooltip: { textStyle: { fontSize: 12 } }
+    };
+  }
+
+  // ---------- 渲染：KPI ----------
+  function renderKPIs() {
+    var k = VM.kpis();
+    function card(label, value, delta, up) {
+      var deltaHtml = delta ? '<div class="delta ' + (up === null ? '' : (up ? 'up' : 'down')) + '">' + delta + '</div>' : '';
+      var unit = (Math.abs(value) >= 1e4) ? '' : '元';
+      return '<div class="kpi"><div class="label">' + label + '</div>' +
+             '<div class="value">' + fmtWan(value) + '<span class="unit">' + unit + '</span></div>' + deltaHtml + '</div>';
+    }
+    $('kpis').innerHTML =
+      card('淨值', k.networth, '較一年前 ' + (k.yoy >= 0 ? '▲' : '▼') + ' ' + fmtWan(Math.abs(k.yoy)) + '（' + k.yoyPct.toFixed(1) + '%）', k.yoy >= 0) +
+      card('總資產', k.assets, k.asOf + ' 月底', null) +
+      card('總負債', k.liabilities, k.asOf + ' 月底', null);
+  }
+
+  // ---------- 渲染：趨勢圖 ----------
+  function renderTrend() {
+    if (!chartsReady) return;
+    var series = VM.trendData(), gran = VM.trend().granularity, pts = series.points;
+
+    var dt = new google.visualization.DataTable();
+    dt.addColumn('string', series.xLabel);
+    dt.addColumn('number', '總資產');
+    dt.addColumn('number', '總負債');
+    dt.addColumn('number', '淨值');
+    dt.addColumn('number', '淨值增減');
+    dt.addColumn({ type: 'string', role: 'style' });
+    var upC = cssVar('--net'), downC = cssVar('--liab');
+    pts.forEach(function (p) {
+      var style = (p.delta == null) ? null : ('color: ' + (p.delta >= 0 ? upC : downC) + '; opacity: 0.55');
+      dt.addRow([p.label, p.assets, p.liab, p.net, p.delta, style]);
+    });
+
+    var o = baseOptions();
+    o.seriesType = 'area';
+    o.series = {
+      0: { type: 'area', color: cssVar('--asset'), areaOpacity: 0.12, lineWidth: 2, targetAxisIndex: 0 },
+      1: { type: 'area', color: cssVar('--liab'), areaOpacity: 0.10, lineWidth: 2, targetAxisIndex: 0 },
+      2: { type: 'line', color: cssVar('--net'), lineWidth: 3, targetAxisIndex: 0 },
+      3: { type: 'bars', targetAxisIndex: 1 }
+    };
+    var muted = cssVar('--muted'), grid = cssVar('--border');
+    o.vAxes = {
+      0: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: grid, count: 5 }, baselineColor: grid, format: 'short' },
+      1: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: 'transparent' }, baselineColor: grid, format: 'short' }
+    };
+    delete o.vAxis;
+    o.bar = { groupWidth: gran === 'year' ? '55%' : '72%' };
+    if (gran === 'year') o.pointSize = 5;
+    o.hAxis.showTextEvery = Math.max(1, Math.ceil(pts.length / 8));
+    o.chartArea = { left: 64, right: 60, top: 20, bottom: 44, width: '100%', height: '100%' };
+    new google.visualization.ComboChart($('trendChart')).draw(dt, o);
+  }
+
+  // ---------- 渲染：資產組成 ----------
+  function renderComposition() {
+    if (!chartsReady) return;
+    var c = VM.compositionData();
+    $('monthLabel').textContent = c.month;
+
+    var o = baseOptions();
+    o.chartArea = { left: 10, right: 10, top: 20, bottom: 20, width: '100%', height: '86%' };
+    o.pieHole = 0.55;
+    o.legend = { position: 'right', textStyle: { color: cssVar('--text'), fontSize: 12 }, alignment: 'center' };
+    o.pieSliceText = 'percentage';
+    o.pieSliceTextStyle = { color: '#fff', fontSize: 11 };
+    o.tooltip = { text: 'value' };
+    o.colors = ['#2f6df6', '#17a673', '#f5a623', '#e0533d', '#8a5cf6', '#12a4b8', '#d94f9a', '#6b7280', '#3fb27f', '#c98a2b'];
+    if (!c.items.length) { $('compChart').innerHTML = '<p class="hint">該月無資產餘額</p>'; }
+    else {
+      var rows = [['帳戶', '金額']];
+      c.items.forEach(function (it) { rows.push([it.short, it.value]); });
+      new google.visualization.PieChart($('compChart')).draw(google.visualization.arrayToDataTable(rows), o);
+    }
+
+    var html = '<table><thead><tr><th>資產帳戶</th><th>金額</th><th>佔比</th></tr></thead><tbody>';
+    c.items.forEach(function (it) {
+      html += '<tr><td>' + it.short + '</td><td>' + fmtFull(it.value) + '</td><td>' + (c.total ? (it.value / c.total * 100).toFixed(1) : 0) + '%</td></tr>';
+    });
+    html += '<tr><td><b>合計</b></td><td><b>' + fmtFull(c.total) + '</b></td><td>100%</td></tr></tbody></table>';
+    $('compTable').innerHTML = html;
+  }
+
+  // ---------- 渲染：年度收支 ----------
+  function renderYearly() {
+    if (!chartsReady) return;
+    var yearly = VM.yearlyData();
+    var rows = [['年度', '收入', '支出', '淨結餘']];
+    yearly.forEach(function (y) { rows.push([y.year, y.income, y.expense, y.net]); });
+
+    var o = baseOptions();
+    o.seriesType = 'bars';
+    o.series = {
+      0: { type: 'bars', color: cssVar('--net') },
+      1: { type: 'bars', color: cssVar('--liab') },
+      2: { type: 'line', color: cssVar('--accent'), lineWidth: 3, pointSize: 4 }
+    };
+    o.bar = { groupWidth: '62%' };
+    o.legend = { position: 'top', textStyle: { color: cssVar('--text'), fontSize: 12 } };
+    new google.visualization.ComboChart($('yearlyChart')).draw(google.visualization.arrayToDataTable(rows), o);
+
+    var html = '<table><thead><tr><th>年度</th><th>收入</th><th>支出</th><th>淨結餘</th></tr></thead><tbody>';
+    yearly.forEach(function (y) {
+      html += '<tr><td>' + y.year + '</td><td>' + fmtFull(y.income) + '</td><td>' + fmtFull(y.expense) +
+              '</td><td class="' + (y.net >= 0 ? 'up' : 'down') + '">' + fmtFull(y.net) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    $('yearlyTable').innerHTML = html;
+  }
+
+  function renderActive() {
+    var v = VM.activeView();
+    if (v === 'trend') renderTrend();
+    else if (v === 'composition') renderComposition();
+    else renderYearly();
+  }
+
+  // ---------- DOM：起/迄選項與同步 ----------
+  function populateRangeOptions(gran) {
+    var opts = (gran === 'year')
+      ? M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('')
+      : M.months().map(function (m, i) { return '<option value="' + i + '">' + m + '</option>'; }).join('');
+    $('trendStart').innerHTML = opts;
+    $('trendEnd').innerHTML = opts;
+  }
+  function syncRangeControls(r) {
+    $('trendStart').value = r.start;
+    $('trendEnd').value = r.end;
+    document.querySelectorAll('.preset').forEach(function (b) {
+      b.classList.toggle('active', parseInt(b.dataset.months, 10) === r.presetMonths);
+    });
+  }
+
+  // ---------- 事件轉發：DOM → ViewModel ----------
+  function wireEvents() {
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.onclick = function () { VM.setActiveView(t.dataset.view); };
+    });
+    document.querySelectorAll('.gran').forEach(function (btn) {
+      btn.onclick = function () { VM.setGranularity(btn.dataset.gran); };
+    });
+    document.querySelectorAll('.preset').forEach(function (btn) {
+      btn.onclick = function () { VM.applyPreset(parseInt(btn.dataset.months, 10)); };
+    });
+    var startSel = $('trendStart'), endSel = $('trendEnd');
+    startSel.onchange = function () {
+      var s = startSel.value, e = endSel.value;
+      if (parseInt(s, 10) > parseInt(e, 10)) e = s;   // 起不得晚於迄
+      VM.setRange(s, e);
+    };
+    endSel.onchange = function () {
+      var s = startSel.value, e = endSel.value;
+      if (parseInt(e, 10) < parseInt(s, 10)) s = e;
+      VM.setRange(s, e);
+    };
+    $('monthSlider').oninput = function () { VM.setCompositionMonth(parseInt(this.value, 10) || 0); };
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function () { renderActive(); });
+    }
+    window.addEventListener('resize', function () { renderActive(); });
+  }
+
+  // ---------- 訂閱：ViewModel → View ----------
+  function wireSubscriptions() {
+    VM.on('activeViewChanged', function (v) {
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.view === v); });
+      ['trend', 'composition', 'yearly'].forEach(function (nm) { $('view-' + nm).classList.toggle('hidden', nm !== v); });
+      renderActive();   // 顯示後重繪，避免隱藏時尺寸為 0
+    });
+    VM.on('granularityChanged', function (g) {
+      document.querySelectorAll('.gran').forEach(function (b) { b.classList.toggle('active', b.dataset.gran === g); });
+      populateRangeOptions(g);
+    });
+    VM.on('rangeChanged', function (r) { syncRangeControls(r); });
+    VM.on('trendChanged', function () { if (VM.activeView() === 'trend') renderTrend(); });
+    VM.on('compositionChanged', function () { renderComposition(); });
+  }
+
+  // ---------- 啟動 ----------
+  function showError(msg) {
+    $('loading').classList.add('hidden');
+    var el = $('error'); el.classList.remove('hidden'); el.className = 'err';
+    el.textContent = '載入失敗：' + msg;
+  }
+
+  function tryStart() {
+    if (started || !chartsReady || !dataReady) return;
+    if (M.isEmpty()) { showError('沒有交易資料，請確認已匯入 Transactions 工作表'); return; }
+    started = true;
+    $('loading').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('meta').textContent = M.txnCount() + ' 筆交易 · ' + M.firstMonth() + ' ～ ' + M.lastMonth() + ' · 更新於 ' + M.generatedAt();
+    var slider = $('monthSlider');
+    slider.max = M.monthCount() - 1;
+    slider.value = M.monthCount() - 1;
+    renderKPIs();
+    renderTrend();
+    renderComposition();
+    renderYearly();
+  }
+
+  function onData(data) {
+    M.load(data);
+    if (M.isEmpty()) { dataReady = true; showError('沒有交易資料，請確認已匯入 Transactions 工作表'); return; }
+    populateRangeOptions(VM.trend().granularity);  // 先建選項，VM.init 的 rangeChanged 才能同步值
+    VM.init();
+    dataReady = true;
+    tryStart();
+  }
+
+  function boot() {
+    wireEvents();
+    wireSubscriptions();
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(function () { chartsReady = true; tryStart(); });
+
+    if (window.PRELOADED_DATA) {                    // 本機預覽：直接用內嵌資料
+      onData(window.PRELOADED_DATA);
+    } else {                                         // GAS：向後端取資料
+      google.script.run
+        .withSuccessHandler(onData)
+        .withFailureHandler(function (e) { showError(e && e.message ? e.message : e); })
+        .getDashboardData();
+    }
+  }
+
+  boot();
+})();
+</script>

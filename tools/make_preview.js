@@ -44,11 +44,15 @@ const payload = {
   txnCount: txns.length, generatedAt: '(本機預覽)'
 };
 
-// 3) 注入 index.html：把 google.script.run 區塊換成內嵌資料
+// 3) 組合 index.html：解析 GAS 的 <?!= include('X') ?> 模板，再內嵌資料
 let html = fs.readFileSync(path.join(ROOT, 'src', 'index.html'), 'utf8');
-const runBlock = /google\.script\.run[\s\S]*?\.getDashboardData\(\);/;
-if (!runBlock.test(html)) { console.error('找不到 google.script.run 區塊，無法注入'); process.exit(1); }
-html = html.replace(runBlock, 'DATA = ' + JSON.stringify(payload) + '; maybeRender();');
+// 3a) 解析 include（模擬 GAS 的 HtmlService.include）
+html = html.replace(/<\?!=\s*include\('([^']+)'\)\s*\?>/g, function (_, name) {
+  return fs.readFileSync(path.join(ROOT, 'src', name + '.html'), 'utf8');
+});
+// 3b) 注入預載資料（GAS 版由 google.script.run 取得；預覽版走 window.PRELOADED_DATA）
+if (html.indexOf('<!--PRELOADED_DATA-->') < 0) { console.error('找不到 <!--PRELOADED_DATA--> 佔位，無法注入'); process.exit(1); }
+html = html.replace('<!--PRELOADED_DATA-->', '<script>window.PRELOADED_DATA = ' + JSON.stringify(payload) + ';</script>');
 
 const outDir = path.join(ROOT, 'preview');
 fs.mkdirSync(outDir, { recursive: true });
