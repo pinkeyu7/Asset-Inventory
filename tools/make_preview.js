@@ -40,7 +40,8 @@ try {
 
 const payload = {
   months: ts.months, totals: ts.totals, assetSeries: ts.assetSeries,
-  liabilitySeries: ts.liabilitySeries, yearly: ts.yearly, monthly: ts.monthly, accountMeta: accMeta,
+  liabilitySeries: ts.liabilitySeries, yearly: ts.yearly, monthly: ts.monthly,
+  incomeByYear: ts.incomeByYear, expenseByYear: ts.expenseByYear, accountMeta: accMeta,
   txnCount: txns.length, generatedAt: '(本機預覽)'
 };
 

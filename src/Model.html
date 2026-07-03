@@ -102,6 +102,48 @@ App.Model = (function () {
     return { xLabel: xLabel, points: pts };
   }
 
+  // 全期出現過的收入帳戶，依「全期總額」由大到小排序（供固定配色用，與所選年份無關）
+  function incomeAccounts() {
+    var map = D.incomeByYear || {}, agg = {};
+    Object.keys(map).forEach(function (y) {
+      var a = map[y];
+      Object.keys(a).forEach(function (k) { agg[k] = (agg[k] || 0) + a[k]; });
+    });
+    return Object.keys(agg).sort(function (a, b) { return agg[b] - agg[a]; });
+  }
+
+  // 收入來源：某年（或 'ALL' 全部）各收入帳戶 → {items:[{full,short,value}], total}
+  function incomeBreakdown(year) {
+    var map = D.incomeByYear || {};
+    var agg = {};
+    Object.keys(map).forEach(function (y) {
+      if (year === 'ALL' || y === String(year)) {
+        var accs = map[y];
+        Object.keys(accs).forEach(function (a) { agg[a] = (agg[a] || 0) + accs[a]; });
+      }
+    });
+    var items = Object.keys(agg).map(function (a) { return { full: a, short: shortName(a), value: agg[a] }; })
+      .filter(function (it) { return it.value > 0.5; })
+      .sort(function (a, b) { return b.value - a.value; });
+    var total = items.reduce(function (s, it) { return s + it.value; }, 0);
+    return { items: items, total: total };
+  }
+
+  // 收入來源年度比較：{years:[...], accounts:[{full,short}...(固定順序)], rows:[[各來源金額]...對齊 years]}
+  function incomeTrend() {
+    var map = D.incomeByYear || {};
+    var years = Object.keys(map).sort();
+    var accs = incomeAccounts();
+    return {
+      years: years,
+      accounts: accs.map(function (a) { return { full: a, short: shortName(a) }; }),
+      rows: years.map(function (y) {
+        var o = map[y] || {};
+        return accs.map(function (a) { return Math.round(o[a] || 0); });
+      })
+    };
+  }
+
   // 資產組成：某月各資產帳戶 → {month, items:[{full,short,value}], total}
   function composition(idx) {
     var items = [];
@@ -119,7 +161,9 @@ App.Model = (function () {
     months: months, monthCount: monthCount, txnCount: txnCount, generatedAt: generatedAt,
     firstMonth: firstMonth, lastMonth: lastMonth, yearly: yearly, shortName: shortName,
     nowIndex: nowIndex, distinctYears: distinctYears, nowYear: nowYear,
-    kpis: kpis, trendSeries: trendSeries, composition: composition, monthlyByYear: monthlyByYear
+    kpis: kpis, trendSeries: trendSeries, composition: composition,
+    monthlyByYear: monthlyByYear, incomeBreakdown: incomeBreakdown,
+    incomeAccounts: incomeAccounts, incomeTrend: incomeTrend
   };
 })();
 </script>

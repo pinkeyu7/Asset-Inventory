@@ -35,6 +35,7 @@
         <button class="tab" data-view="composition">🥧 資產組成</button>
         <button class="tab" data-view="monthly">📅 月度收支</button>
         <button class="tab" data-view="yearly">📊 年度收支</button>
+        <button class="tab" data-view="income">💰 收入來源</button>
       </div>
 
       <!-- 淨值趨勢 -->
@@ -108,6 +109,27 @@
         <div class="card">
           <h2>年度數字</h2>
           <div id="yearlyTable"></div>
+        </div>
+      </section>
+
+      <!-- 收入來源 -->
+      <section id="view-income" class="hidden">
+        <div class="card">
+          <h2>收入來源佔比</h2>
+          <p class="hint">選擇年份（或全部），檢視各收入來源的金額與佔比</p>
+          <div class="controls">
+            <label>年份</label><select id="incomeYear"></select>
+          </div>
+          <div id="incomeChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h2>各來源明細</h2>
+          <div id="incomeTable"></div>
+        </div>
+        <div class="card">
+          <h2>各來源年度比較</h2>
+          <p class="hint">各收入來源歷年金額（堆疊，總高度＝當年總收入；與所選年份無關）</p>
+          <div id="incomeTrendChart" class="chart tall"></div>
         </div>
       </section>
     </div>

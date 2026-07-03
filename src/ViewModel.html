@@ -17,7 +17,8 @@ App.ViewModel = (function () {
     activeView: 'trend',                                             // trend | composition | monthly | yearly
     trend: { granularity: 'month', presetMonths: 36, start: null, end: null },
     composition: { monthIndex: 0 },
-    monthly: { year: null }
+    monthly: { year: null },
+    income: { year: 'ALL' }
   };
 
   // 資料就緒後呼叫：設定各項預設
@@ -25,6 +26,7 @@ App.ViewModel = (function () {
     applyPreset(36);                             // 預設近3年（月顆粒度）
     state.composition.monthIndex = M.monthCount() - 1;
     state.monthly.year = String(M.nowYear());    // 月度收支預設今年
+    state.income.year = 'ALL';                   // 收入來源預設全部年份
   }
 
   // ---- 命令 ----
@@ -80,6 +82,11 @@ App.ViewModel = (function () {
     emit('monthlyChanged', state.monthly.year);
   }
 
+  function setIncomeYear(year) {
+    state.income.year = String(year);
+    emit('incomeChanged', state.income.year);
+  }
+
   // ---- 給 View 讀的 computed ----
   function activeView() { return state.activeView; }
   function trend() { return state.trend; }
@@ -89,14 +96,19 @@ App.ViewModel = (function () {
   function yearlyData() { return M.yearly(); }
   function monthlyYear() { return state.monthly.year; }
   function monthlyData() { return M.monthlyByYear(state.monthly.year); }
+  function incomeYear() { return state.income.year; }
+  function incomeData() { return M.incomeBreakdown(state.income.year); }
+  function incomeTrendData() { return M.incomeTrend(); }
 
   return {
     on: on, init: init,
     setActiveView: setActiveView, setGranularity: setGranularity, applyPreset: applyPreset,
     setRange: setRange, setCompositionMonth: setCompositionMonth, setMonthlyYear: setMonthlyYear,
+    setIncomeYear: setIncomeYear,
     activeView: activeView, trend: trend, trendData: trendData, kpis: kpis,
     compositionData: compositionData, yearlyData: yearlyData,
-    monthlyYear: monthlyYear, monthlyData: monthlyData
+    monthlyYear: monthlyYear, monthlyData: monthlyData,
+    incomeYear: incomeYear, incomeData: incomeData, incomeTrendData: incomeTrendData
   };
 })();
 </script>

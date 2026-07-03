@@ -120,6 +120,8 @@ function buildDashboardData_() {
     liabilitySeries: ts.liabilitySeries,
     yearly: ts.yearly,
     monthly: ts.monthly,
+    incomeByYear: ts.incomeByYear,
+    expenseByYear: ts.expenseByYear,
     accountMeta: accMeta,
     txnCount: txns.length,
     generatedAt: Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm')
