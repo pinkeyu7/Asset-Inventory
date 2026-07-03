@@ -12,12 +12,21 @@
         <h1>個人資產變化紀錄</h1>
         <div class="sub" id="meta"></div>
       </div>
-      <div class="upload">
+      <div class="upload hidden" id="upload">
         <input type="file" id="plistFile" accept=".plist,.xml,text/xml" hidden>
         <button class="upload-btn" id="uploadBtn">⬆️ 上傳 source.plist</button>
         <span class="upload-status" id="uploadStatus"></span>
       </div>
     </header>
+
+    <div id="gate" class="gate hidden">
+      <div class="gate-box">
+        <h2>🔒 請輸入通關密碼</h2>
+        <input type="password" id="gateCode" placeholder="密碼" autocomplete="current-password">
+        <button id="gateBtn" class="upload-btn">進入</button>
+        <div class="gate-err" id="gateErr"></div>
+      </div>
+    </div>
 
     <div id="loading" class="loading"><div class="spin"></div><div style="margin-top:10px">載入資料中…</div></div>
     <div id="app" class="hidden">

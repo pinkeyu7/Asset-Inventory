@@ -11,6 +11,22 @@ var TX_SHEET = 'Transactions';
 var ACC_SHEET = 'Accounts';
 var CACHE_KEY = 'timeseries_v1';
 var CACHE_TTL = 21600; // 6 小時
+var CODE_PROP = 'ACCESS_CODE'; // 通關密碼存於「指令碼屬性」，不寫進程式碼
+
+/**
+ * 設定通關密碼：在 Apps Script 編輯器把下面的 'change-me' 改成你的密碼，
+ * 執行本函式一次即可（或改用：專案設定 → 指令碼屬性 → 新增屬性 ACCESS_CODE）。
+ */
+function setAccessCode() {
+  PropertiesService.getScriptProperties().setProperty(CODE_PROP, 'change-me');
+}
+
+/** 驗證前端傳來的通關密碼；未設定或錯誤都擋下（錯誤時稍延遲以拖慢暴力猜測）。 */
+function checkCode_(code) {
+  var stored = PropertiesService.getScriptProperties().getProperty(CODE_PROP);
+  if (!stored) throw new Error('尚未設定通關密碼，請先在 Apps Script 執行 setAccessCode 或於指令碼屬性設定 ACCESS_CODE');
+  if (String(code || '') !== stored) { Utilities.sleep(800); throw new Error('密碼錯誤'); }
+}
 
 /** Web App 進入點（index 為模板，會以 include() 組入 Styles/Model/ViewModel/View） */
 function doGet() {
@@ -70,8 +86,14 @@ function normalizeMonth(month, date) {
   return s;
 }
 
-/** 前端主要資料來源：回傳完整時間序列 + 帳戶顯示資訊（含快取）。 */
-function getDashboardData() {
+/** 前端主要資料來源：需通關密碼。 */
+function getDashboardData(code) {
+  checkCode_(code);
+  return buildDashboardData_();
+}
+
+/** 實際組出儀表板資料（含快取）；內部使用，不做密碼檢查。 */
+function buildDashboardData_() {
   var cache = CacheService.getUserCache();
   var cached = cache.get(CACHE_KEY);
   if (cached) return JSON.parse(cached);
@@ -112,8 +134,10 @@ function getDashboardData() {
  * 前端上傳 source.plist 解析後呼叫：把資料寫入 Transactions / Accounts 工作表，
  * 清快取並回傳最新的儀表板資料。
  * @param {{transactions: Array<Array>, accounts: Array<Array>}} payload  皆含表頭列
+ * @param {string} code  通關密碼
  */
-function importData(payload) {
+function importData(payload, code) {
+  checkCode_(code);
   if (!payload || !payload.transactions || !payload.transactions.length) {
     throw new Error('沒有可匯入的交易資料');
   }
@@ -121,7 +145,7 @@ function importData(payload) {
   writeSheet_(ss, TX_SHEET, payload.transactions);
   writeSheet_(ss, ACC_SHEET, payload.accounts || []);
   clearCache();
-  return getDashboardData();
+  return buildDashboardData_();
 }
 
 /** 以列陣列覆寫指定工作表（不存在則新建）；Month 欄設為純文字避免被轉成日期。 */

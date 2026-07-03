@@ -211,6 +211,7 @@
 
   // ---------- 啟動 / 重載 ----------
   var pendingData = null;
+  var accessCode = '';          // 通關密碼（驗證通過後保存，供上傳時再次帶上）
 
   function showError(msg) {
     $('loading').classList.add('hidden');
@@ -220,6 +221,7 @@
   function showEmpty() {
     $('loading').classList.add('hidden');
     $('app').classList.add('hidden');
+    if ($('upload')) $('upload').classList.remove('hidden');   // 空資料時也要能上傳
     var el = $('error'); el.classList.remove('hidden'); el.className = 'note';
     el.textContent = '尚無資料。請點右上角「⬆️ 上傳 source.plist」匯入你的記帳檔。';
   }
@@ -231,6 +233,7 @@
     $('error').classList.add('hidden');
     $('loading').classList.add('hidden');
     $('app').classList.remove('hidden');
+    if ($('upload')) $('upload').classList.remove('hidden');   // 驗證通過後才顯示上傳
     populateRangeOptions(VM.trend().granularity);  // 先建選項，VM.init 的 rangeChanged 才能同步值
     VM.init();
     $('meta').textContent = M.txnCount() + ' 筆交易 · ' + M.firstMonth() + ' ～ ' + M.lastMonth() + ' · 更新於 ' + M.generatedAt();
@@ -288,27 +291,63 @@
             btn.disabled = false;
             setUploadStatus('❌ 寫入失敗：' + (e && e.message ? e.message : e), true);
           })
-          .importData(rows);
+          .importData(rows, accessCode);
       };
       reader.readAsText(f);
     };
+  }
+
+  // ---------- 通關密碼 ----------
+  function showGate() {
+    $('gate').classList.remove('hidden');
+    $('loading').classList.add('hidden');
+    $('app').classList.add('hidden');
+    $('error').classList.add('hidden');
+    setTimeout(function () { var i = $('gateCode'); if (i) i.focus(); }, 50);
+  }
+  function requestData(code) {
+    $('gateErr').style.color = cssVar('--muted');
+    $('gateErr').textContent = '驗證中…';
+    google.script.run
+      .withSuccessHandler(function (data) {
+        accessCode = code;
+        try { sessionStorage.setItem('ai_code', code); } catch (e) {}
+        $('gate').classList.add('hidden');
+        $('loading').classList.remove('hidden');
+        onData(data);
+      })
+      .withFailureHandler(function (e) {
+        $('gateErr').style.color = cssVar('--liab');
+        $('gateErr').textContent = (e && e.message ? e.message : String(e));
+        var i = $('gateCode'); if (i) i.select();
+      })
+      .getDashboardData(code);
+  }
+  function wireGate() {
+    var btn = $('gateBtn'), input = $('gateCode');
+    if (!btn || !input) return;
+    function submit() { var c = input.value; if (!c) { $('gateErr').textContent = '請輸入密碼'; return; } requestData(c); }
+    btn.onclick = submit;
+    input.onkeydown = function (e) { if (e.key === 'Enter') submit(); };
   }
 
   function boot() {
     wireEvents();
     wireSubscriptions();
     wireUpload();
+    wireGate();
     google.charts.load('current', { packages: ['corechart'] });
     google.charts.setOnLoadCallback(function () { chartsReady = true; tryStart(); });
 
-    if (window.PRELOADED_DATA) {                    // 本機預覽：直接用內嵌資料
+    if (window.PRELOADED_DATA) {                    // 本機預覽：直接用內嵌資料，免密碼
       onData(window.PRELOADED_DATA);
-    } else {                                         // GAS：向後端取資料
-      google.script.run
-        .withSuccessHandler(onData)
-        .withFailureHandler(function (e) { showError(e && e.message ? e.message : e); })
-        .getDashboardData();
+      return;
     }
+    // GAS：頁面可公開開啟，但需通關密碼才取得資料
+    showGate();
+    var saved = '';
+    try { saved = sessionStorage.getItem('ai_code') || ''; } catch (e) {}
+    if (saved) requestData(saved);                  // 本次瀏覽階段記住密碼，重整免再輸入
   }
 
   boot();
