@@ -84,9 +84,19 @@
     new google.visualization.ComboChart($('trendChart')).draw(dt, o);
   }
 
+  // 資產組成固定配色：依全期最大餘額順序，把調色盤色固定綁到各帳戶（與所選月份無關）
+  var ASSET_PALETTE = ['#2f6df6', '#17a673', '#f5a623', '#e0533d', '#8a5cf6', '#12a4b8', '#d94f9a', '#6b7280', '#3fb27f', '#c98a2b'];
+  var assetColorMap = null;
+  function ensureAssetColors() {
+    if (assetColorMap) return;
+    assetColorMap = {};
+    M.assetAccounts().forEach(function (full, i) { assetColorMap[full] = ASSET_PALETTE[i % ASSET_PALETTE.length]; });
+  }
+
   // ---------- 渲染：資產組成 ----------
   function renderComposition() {
     if (!chartsReady) return;
+    ensureAssetColors();
     var c = VM.compositionData();
     $('monthLabel').textContent = c.month;
 
@@ -97,7 +107,7 @@
     o.pieSliceText = 'percentage';
     o.pieSliceTextStyle = { color: '#fff', fontSize: 11 };
     o.tooltip = { text: 'value' };
-    o.colors = ['#2f6df6', '#17a673', '#f5a623', '#e0533d', '#8a5cf6', '#12a4b8', '#d94f9a', '#6b7280', '#3fb27f', '#c98a2b'];
+    o.colors = c.items.map(function (it) { return assetColorMap[it.full]; });  // 依帳戶固定上色
     if (!c.items.length) { $('compChart').innerHTML = '<p class="hint">該月無資產餘額</p>'; }
     else {
       var rows = [['帳戶', '金額']];
@@ -338,6 +348,7 @@
     populateMonthlyYears();
     populateIncomeYears();
     $('meta').textContent = M.txnCount() + ' 筆交易 · ' + M.firstMonth() + ' ～ ' + M.lastMonth() + ' · 更新於 ' + M.generatedAt();
+    assetColorMap = null;                  // 重建配色（上傳新資料後帳戶可能改變）
     var slider = $('monthSlider');
     slider.max = M.monthCount() - 1;
     slider.value = M.monthCount() - 1;

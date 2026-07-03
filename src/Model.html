@@ -144,6 +144,13 @@ App.Model = (function () {
     };
   }
 
+  // 資產帳戶，依「全期最大餘額」由大到小排序（供固定配色用，與所選月份無關）
+  function assetAccounts() {
+    var s = D.assetSeries || {};
+    function maxOf(arr) { var m = 0; for (var i = 0; i < arr.length; i++) if (arr[i] > m) m = arr[i]; return m; }
+    return Object.keys(s).sort(function (a, b) { return maxOf(s[b]) - maxOf(s[a]); });
+  }
+
   // 資產組成：某月各資產帳戶 → {month, items:[{full,short,value}], total}
   function composition(idx) {
     var items = [];
@@ -163,7 +170,7 @@ App.Model = (function () {
     nowIndex: nowIndex, distinctYears: distinctYears, nowYear: nowYear,
     kpis: kpis, trendSeries: trendSeries, composition: composition,
     monthlyByYear: monthlyByYear, incomeBreakdown: incomeBreakdown,
-    incomeAccounts: incomeAccounts, incomeTrend: incomeTrend
+    incomeAccounts: incomeAccounts, incomeTrend: incomeTrend, assetAccounts: assetAccounts
   };
 })();
 </script>
