@@ -1,0 +1,15 @@
+<script>
+// ViewModel（資產組成）：所選月份
+(function () {
+  var VM = App.ViewModel, M = App.Model;
+  VM.state.composition = { monthIndex: 0 };
+
+  VM.setCompositionMonth = function (idx) {
+    VM.state.composition.monthIndex = idx;
+    VM.emit('compositionChanged', idx);
+  };
+  VM.compositionData = function () { return M.composition(VM.state.composition.monthIndex); };
+
+  VM.registerInit(function () { VM.state.composition.monthIndex = M.monthCount() - 1; });
+})();
+</script>

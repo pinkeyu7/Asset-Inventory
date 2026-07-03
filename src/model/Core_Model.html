@@ -1,0 +1,52 @@
+<script>
+// ============================================================
+// Core Model —— 資料持有與共用 helper（各頁 Model 檔以此為基礎擴充）
+// ============================================================
+window.App = window.App || {};
+App.Model = (function () {
+  var D = null;   // getDashboardData() 回傳的資料
+
+  function load(data) { D = data; }
+  function data() { return D; }
+  function isEmpty() { return !D || !D.months || !D.months.length; }
+
+  function months() { return D.months; }
+  function monthCount() { return D.months.length; }
+  function txnCount() { return D.txnCount; }
+  function generatedAt() { return D.generatedAt; }
+  function firstMonth() { return D.months[0]; }
+  function lastMonth() { return D.months[D.months.length - 1]; }
+
+  function shortName(full) {
+    return (D.accountMeta[full] && D.accountMeta[full].short) || full.replace(/^[A-Z]-/, '');
+  }
+
+  // 今天的年月在 months 中的索引（含未來紀錄時以「現在」為終點往前推）
+  function nowIndex() {
+    var d = new Date(), mm = d.getMonth() + 1;
+    var ym = d.getFullYear() + '-' + (mm < 10 ? '0' + mm : '' + mm);
+    var idx = D.months.indexOf(ym);
+    if (idx >= 0) return idx;
+    var first = D.months[0].split('-');
+    var base = parseInt(first[0], 10) * 12 + (parseInt(first[1], 10) - 1);
+    var target = d.getFullYear() * 12 + (mm - 1);
+    return Math.max(0, Math.min(D.months.length - 1, target - base));
+  }
+  function distinctYears() {
+    var ys = [], seen = {};
+    D.months.forEach(function (m) { var y = m.split('-')[0]; if (!seen[y]) { seen[y] = 1; ys.push(y); } });
+    return ys;
+  }
+  function nowYear() {
+    var ys = distinctYears(), y = new Date().getFullYear();
+    return Math.max(parseInt(ys[0], 10), Math.min(parseInt(ys[ys.length - 1], 10), y));
+  }
+
+  return {
+    load: load, data: data, isEmpty: isEmpty,
+    months: months, monthCount: monthCount, txnCount: txnCount, generatedAt: generatedAt,
+    firstMonth: firstMonth, lastMonth: lastMonth, shortName: shortName,
+    nowIndex: nowIndex, distinctYears: distinctYears, nowYear: nowYear
+  };
+})();
+</script>

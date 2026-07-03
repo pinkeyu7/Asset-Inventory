@@ -1,0 +1,25 @@
+<script>
+// Model（資產組成）：資產帳戶固定順序、某月組成
+(function () {
+  var M = App.Model;
+
+  // 資產帳戶，依「全期最大餘額」由大到小排序（供固定配色用，與所選月份無關）
+  M.assetAccounts = function () {
+    var s = M.data().assetSeries || {};
+    function maxOf(arr) { var m = 0; for (var i = 0; i < arr.length; i++) if (arr[i] > m) m = arr[i]; return m; }
+    return Object.keys(s).sort(function (a, b) { return maxOf(s[b]) - maxOf(s[a]); });
+  };
+
+  // 某月各資產帳戶 → {month, items:[{full,short,value}], total}
+  M.composition = function (idx) {
+    var D = M.data(), items = [];
+    Object.keys(D.assetSeries).forEach(function (acc) {
+      var v = D.assetSeries[acc][idx];
+      if (v > 0.5) items.push({ full: acc, short: M.shortName(acc), value: v });
+    });
+    items.sort(function (a, b) { return b.value - a.value; });
+    var total = items.reduce(function (s, it) { return s + it.value; }, 0);
+    return { month: D.months[idx], items: items, total: total };
+  };
+})();
+</script>

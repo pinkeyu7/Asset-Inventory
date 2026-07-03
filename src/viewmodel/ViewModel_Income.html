@@ -1,0 +1,17 @@
+<script>
+// ViewModel（收入來源）：所選年份（含 'ALL' 全部）
+(function () {
+  var VM = App.ViewModel, M = App.Model;
+  VM.state.income = { year: 'ALL' };
+
+  VM.setIncomeYear = function (year) {
+    VM.state.income.year = String(year);
+    VM.emit('incomeChanged', VM.state.income.year);
+  };
+  VM.incomeYear = function () { return VM.state.income.year; };
+  VM.incomeData = function () { return M.incomeBreakdown(VM.state.income.year); };
+  VM.incomeTrendData = function () { return M.incomeTrend(); };
+
+  VM.registerInit(function () { VM.state.income.year = 'ALL'; });
+})();
+</script>

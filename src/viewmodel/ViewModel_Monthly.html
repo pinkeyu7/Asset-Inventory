@@ -1,0 +1,16 @@
+<script>
+// ViewModel（月度收支）：所選年份
+(function () {
+  var VM = App.ViewModel, M = App.Model;
+  VM.state.monthly = { year: null };
+
+  VM.setMonthlyYear = function (year) {
+    VM.state.monthly.year = String(year);
+    VM.emit('monthlyChanged', VM.state.monthly.year);
+  };
+  VM.monthlyYear = function () { return VM.state.monthly.year; };
+  VM.monthlyData = function () { return M.monthlyByYear(VM.state.monthly.year); };
+
+  VM.registerInit(function () { VM.state.monthly.year = String(M.nowYear()); });
+})();
+</script>

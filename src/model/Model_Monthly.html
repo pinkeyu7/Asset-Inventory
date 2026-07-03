@@ -1,0 +1,18 @@
+<script>
+// Model（月度收支）：某年各月收支
+(function () {
+  var M = App.Model;
+
+  // 某年各月收支：[{month:'YYYY-MM', mm:'01', income, expense, net}]（依月份升冪）
+  M.monthlyByYear = function (year) {
+    var D = M.data(), pts = [];
+    for (var i = 0; i < D.months.length; i++) {
+      if (D.months[i].split('-')[0] === String(year)) {
+        var f = (D.monthly && D.monthly[i]) || { income: 0, expense: 0, net: 0 };
+        pts.push({ month: D.months[i], mm: D.months[i].split('-')[1], income: f.income, expense: f.expense, net: f.net });
+      }
+    }
+    return pts;
+  };
+})();
+</script>

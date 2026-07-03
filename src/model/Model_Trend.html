@@ -1,0 +1,51 @@
+<script>
+// Model（淨值趨勢）：KPI 與趨勢序列
+(function () {
+  var M = App.Model;
+
+  // KPI：最新淨值/資產/負債 + 年增（對 12 個月前）
+  M.kpis = function () {
+    var D = M.data(), t = D.totals, last = t[t.length - 1];
+    var prev = t[Math.max(0, t.length - 13)];
+    var yoy = last.networth - prev.networth;
+    var yoyPct = prev.networth ? (yoy / Math.abs(prev.networth) * 100) : 0;
+    return {
+      networth: last.networth, assets: last.assets, liabilities: last.liabilities,
+      yoy: yoy, yoyPct: yoyPct, asOf: M.lastMonth()
+    };
+  };
+
+  // 趨勢序列：依顆粒度與起迄回傳 {xLabel, points:[{label,assets,liab,net,delta}]}
+  //   delta = 本期期末淨值 − 上期期末淨值（會參照範圍外的實際上一期，首點才不失真）
+  M.trendSeries = function (gran, startVal, endVal) {
+    var D = M.data(), pts = [], xLabel;
+    if (gran === 'year') {
+      var sy = parseInt(startVal, 10), ey = parseInt(endVal, 10);
+      if (isNaN(sy)) sy = -Infinity;
+      if (isNaN(ey)) ey = Infinity;
+      if (sy > ey) { var s = sy; sy = ey; ey = s; }
+      xLabel = '年度';
+      var yearEndAll = {};
+      for (var i = 0; i < D.months.length; i++) { yearEndAll[parseInt(D.months[i].split('-')[0], 10)] = i; }
+      var allYears = Object.keys(yearEndAll).map(Number).sort(function (a, b) { return a - b; });
+      allYears.forEach(function (yy, pos) {
+        if (yy < sy || yy > ey) return;
+        var t = D.totals[yearEndAll[yy]];
+        var delta = (pos > 0) ? Math.round(t.networth - D.totals[yearEndAll[allYears[pos - 1]]].networth) : null;
+        pts.push({ label: String(yy), assets: t.assets, liab: t.liabilities, net: t.networth, delta: delta });
+      });
+    } else {
+      var start = (startVal === null || startVal === '') ? 0 : parseInt(startVal, 10);
+      var end = (endVal === null || endVal === '') ? D.months.length - 1 : parseInt(endVal, 10);
+      if (start > end) { var tmp = start; start = end; end = tmp; }
+      xLabel = '月份';
+      for (var j = start; j <= end; j++) {
+        var tm = D.totals[j];
+        var d = (j > 0) ? Math.round(tm.networth - D.totals[j - 1].networth) : null;
+        pts.push({ label: D.months[j], assets: tm.assets, liab: tm.liabilities, net: tm.networth, delta: d });
+      }
+    }
+    return { xLabel: xLabel, points: pts };
+  };
+})();
+</script>

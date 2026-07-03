@@ -1,0 +1,55 @@
+<script>
+// View（資產組成）：環圈圖 + 明細，依帳戶固定配色，月份滑桿
+(function () {
+  var V = App.View, VM = App.ViewModel, M = App.Model;
+
+  var ASSET_PALETTE = ['#2f6df6', '#17a673', '#f5a623', '#e0533d', '#8a5cf6', '#12a4b8', '#d94f9a', '#6b7280', '#3fb27f', '#c98a2b'];
+  var assetColorMap = null;
+  function ensureAssetColors() {
+    if (assetColorMap) return;
+    assetColorMap = {};
+    M.assetAccounts().forEach(function (full, i) { assetColorMap[full] = ASSET_PALETTE[i % ASSET_PALETTE.length]; });
+  }
+
+  function render() {
+    if (!V.chartsReady()) return;
+    ensureAssetColors();
+    var c = VM.compositionData();
+    V.$('monthLabel').textContent = c.month;
+    var o = V.baseOptions();
+    o.chartArea = { left: 10, right: 10, top: 20, bottom: 20, width: '100%', height: '86%' };
+    o.pieHole = 0.55;
+    o.legend = { position: 'right', textStyle: { color: V.cssVar('--text'), fontSize: 12 }, alignment: 'center' };
+    o.pieSliceText = 'percentage';
+    o.pieSliceTextStyle = { color: '#fff', fontSize: 11 };
+    o.tooltip = { text: 'value' };
+    o.colors = c.items.map(function (it) { return assetColorMap[it.full]; });
+    if (!c.items.length) { V.$('compChart').innerHTML = '<p class="hint">該月無資產餘額</p>'; }
+    else {
+      var rows = [['帳戶', '金額']];
+      c.items.forEach(function (it) { rows.push([it.short, it.value]); });
+      new google.visualization.PieChart(V.$('compChart')).draw(google.visualization.arrayToDataTable(rows), o);
+    }
+    var html = '<table><thead><tr><th>資產帳戶</th><th>金額</th><th>佔比</th></tr></thead><tbody>';
+    c.items.forEach(function (it) {
+      html += '<tr><td>' + it.short + '</td><td>' + V.fmtFull(it.value) + '</td><td>' + (c.total ? (it.value / c.total * 100).toFixed(1) : 0) + '%</td></tr>';
+    });
+    html += '<tr><td><b>合計</b></td><td><b>' + V.fmtFull(c.total) + '</b></td><td>100%</td></tr></tbody></table>';
+    V.$('compTable').innerHTML = html;
+  }
+
+  function reload() {
+    assetColorMap = null;                  // 重建配色（上傳新資料後帳戶可能改變）
+    var slider = V.$('monthSlider');
+    slider.max = M.monthCount() - 1;
+    slider.value = M.monthCount() - 1;
+  }
+
+  function wire() {
+    V.$('monthSlider').oninput = function () { VM.setCompositionMonth(parseInt(this.value, 10) || 0); };
+    VM.on('compositionChanged', function () { render(); });
+  }
+
+  V.registerPage({ name: 'composition', render: render, wire: wire, reload: reload });
+})();
+</script>

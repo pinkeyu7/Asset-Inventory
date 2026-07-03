@@ -3,7 +3,7 @@
 <head>
   <base target="_top">
   <meta charset="utf-8">
-  <?!= include('View_Styles') ?>
+  <?!= include('view/View_Styles') ?>
 </head>
 <body>
   <div class="wrap">
@@ -138,9 +138,32 @@
 
   <!--PRELOADED_DATA-->
   <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <?!= include('Model') ?>
-  <?!= include('Importer') ?>
-  <?!= include('ViewModel') ?>
-  <?!= include('View') ?>
+
+  <!-- Model 層 -->
+  <?!= include('model/Core_Model') ?>
+  <?!= include('model/Model_Trend') ?>
+  <?!= include('model/Model_Composition') ?>
+  <?!= include('model/Model_Monthly') ?>
+  <?!= include('model/Model_Yearly') ?>
+  <?!= include('model/Model_Income') ?>
+  <?!= include('model/Importer') ?>
+
+  <!-- ViewModel 層 -->
+  <?!= include('viewmodel/Core_ViewModel') ?>
+  <?!= include('viewmodel/ViewModel_Trend') ?>
+  <?!= include('viewmodel/ViewModel_Composition') ?>
+  <?!= include('viewmodel/ViewModel_Monthly') ?>
+  <?!= include('viewmodel/ViewModel_Yearly') ?>
+  <?!= include('viewmodel/ViewModel_Income') ?>
+
+  <!-- View 層 -->
+  <?!= include('view/Core_View') ?>
+  <?!= include('view/View_Trend') ?>
+  <?!= include('view/View_Composition') ?>
+  <?!= include('view/View_Monthly') ?>
+  <?!= include('view/View_Yearly') ?>
+  <?!= include('view/View_Income') ?>
+
+  <script>App.View.boot();</script>
 </body>
 </html>

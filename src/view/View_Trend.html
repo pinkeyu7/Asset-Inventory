@@ -1,0 +1,103 @@
+<script>
+// View（淨值趨勢）：KPI + 資產/負債/淨值走勢 + 起迄/顆粒度控制
+(function () {
+  var V = App.View, VM = App.ViewModel, M = App.Model;
+
+  function renderKPIs() {
+    if (!V.chartsReady()) return;
+    var k = VM.kpis();
+    function card(label, value, delta, up) {
+      var deltaHtml = delta ? '<div class="delta ' + (up === null ? '' : (up ? 'up' : 'down')) + '">' + delta + '</div>' : '';
+      var unit = (Math.abs(value) >= 1e4) ? '' : '元';
+      return '<div class="kpi"><div class="label">' + label + '</div>' +
+             '<div class="value">' + V.fmtWan(value) + '<span class="unit">' + unit + '</span></div>' + deltaHtml + '</div>';
+    }
+    V.$('kpis').innerHTML =
+      card('淨值', k.networth, '較一年前 ' + (k.yoy >= 0 ? '▲' : '▼') + ' ' + V.fmtWan(Math.abs(k.yoy)) + '（' + k.yoyPct.toFixed(1) + '%）', k.yoy >= 0) +
+      card('總資產', k.assets, k.asOf + ' 月底', null) +
+      card('總負債', k.liabilities, k.asOf + ' 月底', null);
+  }
+
+  function renderTrend() {
+    if (!V.chartsReady()) return;
+    var series = VM.trendData(), gran = VM.trend().granularity, pts = series.points;
+    var dt = new google.visualization.DataTable();
+    dt.addColumn('string', series.xLabel);
+    dt.addColumn('number', '總資產');
+    dt.addColumn('number', '總負債');
+    dt.addColumn('number', '淨值');
+    dt.addColumn('number', '淨值增減');
+    dt.addColumn({ type: 'string', role: 'style' });
+    var upC = V.cssVar('--net'), downC = V.cssVar('--liab');
+    pts.forEach(function (p) {
+      var style = (p.delta == null) ? null : ('color: ' + (p.delta >= 0 ? upC : downC) + '; opacity: 0.55');
+      dt.addRow([p.label, p.assets, p.liab, p.net, p.delta, style]);
+    });
+    var o = V.baseOptions();
+    o.seriesType = 'area';
+    o.series = {
+      0: { type: 'area', color: V.cssVar('--asset'), areaOpacity: 0.12, lineWidth: 2, targetAxisIndex: 0 },
+      1: { type: 'area', color: V.cssVar('--liab'), areaOpacity: 0.10, lineWidth: 2, targetAxisIndex: 0 },
+      2: { type: 'line', color: V.cssVar('--net'), lineWidth: 3, targetAxisIndex: 0 },
+      3: { type: 'bars', targetAxisIndex: 1 }
+    };
+    var muted = V.cssVar('--muted'), grid = V.cssVar('--border');
+    o.vAxes = {
+      0: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: grid, count: 5 }, baselineColor: grid, format: 'short' },
+      1: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: 'transparent' }, baselineColor: grid, format: 'short' }
+    };
+    delete o.vAxis;
+    o.bar = { groupWidth: gran === 'year' ? '55%' : '72%' };
+    if (gran === 'year') o.pointSize = 5;
+    o.hAxis.showTextEvery = Math.max(1, Math.ceil(pts.length / 8));
+    o.chartArea = { left: 64, right: 60, top: 20, bottom: 44, width: '100%', height: '100%' };
+    new google.visualization.ComboChart(V.$('trendChart')).draw(dt, o);
+  }
+
+  function populateRangeOptions(gran) {
+    var opts = (gran === 'year')
+      ? M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('')
+      : M.months().map(function (m, i) { return '<option value="' + i + '">' + m + '</option>'; }).join('');
+    V.$('trendStart').innerHTML = opts;
+    V.$('trendEnd').innerHTML = opts;
+  }
+  function syncRangeControls(r) {
+    V.$('trendStart').value = r.start;
+    V.$('trendEnd').value = r.end;
+    document.querySelectorAll('.preset').forEach(function (b) {
+      b.classList.toggle('active', parseInt(b.dataset.months, 10) === r.presetMonths);
+    });
+  }
+
+  function render() { renderKPIs(); renderTrend(); }
+  function beforeInit() { populateRangeOptions(VM.trend().granularity); }
+
+  function wire() {
+    document.querySelectorAll('.gran').forEach(function (btn) {
+      btn.onclick = function () { VM.setGranularity(btn.dataset.gran); };
+    });
+    document.querySelectorAll('.preset').forEach(function (btn) {
+      btn.onclick = function () { VM.applyPreset(parseInt(btn.dataset.months, 10)); };
+    });
+    var startSel = V.$('trendStart'), endSel = V.$('trendEnd');
+    startSel.onchange = function () {
+      var s = startSel.value, e = endSel.value;
+      if (parseInt(s, 10) > parseInt(e, 10)) e = s;
+      VM.setRange(s, e);
+    };
+    endSel.onchange = function () {
+      var s = startSel.value, e = endSel.value;
+      if (parseInt(e, 10) < parseInt(s, 10)) s = e;
+      VM.setRange(s, e);
+    };
+    VM.on('granularityChanged', function (g) {
+      document.querySelectorAll('.gran').forEach(function (b) { b.classList.toggle('active', b.dataset.gran === g); });
+      populateRangeOptions(g);
+    });
+    VM.on('rangeChanged', function (r) { syncRangeControls(r); });
+    VM.on('trendChanged', function () { if (VM.activeView() === 'trend') renderTrend(); });
+  }
+
+  V.registerPage({ name: 'trend', render: render, wire: wire, beforeInit: beforeInit });
+})();
+</script>

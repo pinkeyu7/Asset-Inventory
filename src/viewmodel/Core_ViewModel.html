@@ -1,0 +1,30 @@
+<script>
+// ============================================================
+// Core ViewModel —— 可觀察通知、共用狀態、init 協調（各頁 VM 檔擴充命令/computed）
+// ============================================================
+window.App = window.App || {};
+App.ViewModel = (function () {
+  var subs = {};
+  function on(evt, fn) { (subs[evt] = subs[evt] || []).push(fn); }
+  function emit(evt, payload) { (subs[evt] || []).forEach(function (fn) { fn(payload); }); }
+
+  var state = { activeView: 'trend' };   // 各頁 VM 檔會往 state 加入自己的子狀態
+
+  var initHooks = [];
+  function registerInit(fn) { initHooks.push(fn); }
+  function init() { for (var i = 0; i < initHooks.length; i++) initHooks[i](); }
+
+  function setActiveView(v) {
+    if (state.activeView === v) return;
+    state.activeView = v;
+    emit('activeViewChanged', v);
+  }
+  function activeView() { return state.activeView; }
+
+  return {
+    on: on, emit: emit, state: state,
+    registerInit: registerInit, init: init,
+    setActiveView: setActiveView, activeView: activeView
+  };
+})();
+</script>
