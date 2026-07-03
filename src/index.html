@@ -53,10 +53,23 @@
     .controls label { font-size: 13px; color: var(--muted); }
     input[type=range] { flex: 1; min-width: 180px; accent-color: var(--accent); }
     .month-badge { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 66px; }
+    select {
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 8px; font-size: 13px; font-variant-numeric: tabular-nums;
+    }
+    .presets { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+    .preset, .gran {
+      border: 1px solid var(--border); background: var(--card); color: var(--muted);
+      padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    .preset:hover, .gran:hover { color: var(--text); border-color: var(--accent); }
+    .preset.active, .gran.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .seg { display: inline-flex; gap: 4px; padding-right: 6px; border-right: 1px solid var(--border); margin-right: 4px; }
 
     .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 8px; }
     .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
     .lg-asset::before { background: var(--asset); } .lg-liab::before { background: var(--liab); } .lg-net::before { background: var(--net); }
+    .lg-delta::before { background: linear-gradient(90deg, var(--net) 50%, var(--liab) 50%); }
 
     .hidden { display: none; }
     .loading { text-align: center; color: var(--muted); padding: 60px 0; }
@@ -91,10 +104,24 @@
         <div class="kpis" id="kpis"></div>
         <div class="card">
           <h2>資產 / 負債 / 淨值 走勢</h2>
-          <p class="hint">依每月月底累積餘額計算</p>
+          <p class="hint">顯示各期期末（月底／年底）的累積餘額</p>
+          <div class="controls">
+            <span class="seg">
+              <button class="gran active" data-gran="month">月</button>
+              <button class="gran" data-gran="year">年</button>
+            </span>
+            <label>起</label><select id="trendStart"></select>
+            <label>迄</label><select id="trendEnd"></select>
+            <span class="presets">
+              <button class="preset" data-months="12">近1年</button>
+              <button class="preset" data-months="36">近3年</button>
+              <button class="preset" data-months="60">近5年</button>
+              <button class="preset" data-months="0">全部</button>
+            </span>
+          </div>
           <div id="trendChart" class="chart tall"></div>
           <div class="legend">
-            <span class="lg-asset">總資產</span><span class="lg-liab">總負債</span><span class="lg-net">淨值</span>
+            <span class="lg-asset">總資產</span><span class="lg-liab">總負債</span><span class="lg-net">淨值</span><span class="lg-delta">淨值增減（長條・綠增紅減）</span>
           </div>
         </div>
       </section>
@@ -137,6 +164,7 @@
   <script>
     var DATA = null;
     var chartsReady = false;
+    var trendGran = 'month';   // 'month' | 'year'
 
     google.charts.load('current', { packages: ['corechart'] });
     google.charts.setOnLoadCallback(function () { chartsReady = true; maybeRender(); });
@@ -163,6 +191,7 @@
         DATA.txnCount + ' 筆交易 · ' + DATA.months[0] + ' ～ ' + DATA.months[DATA.months.length - 1] + ' · 更新於 ' + DATA.generatedAt;
       setupTabs();
       renderKPIs();
+      setupTrendControls();
       renderTrend();
       setupComposition();
       renderYearly();
@@ -236,24 +265,182 @@
     }
 
     /* ---------- 趨勢圖 ---------- */
+    // 今天的年月在 DATA.months 中的索引（含未來紀錄時，快捷鈕以「現在」為終點往前推）
+    function nowIndex() {
+      var d = new Date();
+      var mm = d.getMonth() + 1;
+      var ym = d.getFullYear() + '-' + (mm < 10 ? '0' + mm : '' + mm);
+      var idx = DATA.months.indexOf(ym);
+      if (idx >= 0) return idx;
+      // 今天不在資料月份範圍內：用月份算術推算後夾在有效範圍
+      var first = DATA.months[0].split('-');
+      var base = parseInt(first[0], 10) * 12 + (parseInt(first[1], 10) - 1);
+      var target = d.getFullYear() * 12 + (mm - 1);
+      return Math.max(0, Math.min(DATA.months.length - 1, target - base));
+    }
+
+    // 資料中出現過的年份（已排序，因 months 已排序）
+    function distinctYears() {
+      var ys = [], seen = {};
+      DATA.months.forEach(function (m) { var y = m.split('-')[0]; if (!seen[y]) { seen[y] = 1; ys.push(y); } });
+      return ys;
+    }
+    // 今年（夾在資料年份範圍內）
+    function nowYear() {
+      var ys = distinctYears();
+      var y = new Date().getFullYear();
+      return Math.max(parseInt(ys[0], 10), Math.min(parseInt(ys[ys.length - 1], 10), y));
+    }
+    // 目前選取的區間長度（月數），供切換顆粒度時沿用；無 active 快捷鈕時預設近3年
+    function activePresetMonths() {
+      var a = document.querySelector('.preset.active');
+      return a ? parseInt(a.dataset.months, 10) : 36;
+    }
+    function clearPresetActive() {
+      document.querySelectorAll('.preset').forEach(function (b) { b.classList.remove('active'); });
+    }
+
+    // 依目前顆粒度填入起/迄下拉選項（月→月份、年→年份）
+    function populateRange() {
+      var startSel = document.getElementById('trendStart');
+      var endSel = document.getElementById('trendEnd');
+      var opts;
+      if (trendGran === 'year') {
+        opts = distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+      } else {
+        opts = DATA.months.map(function (m, i) { return '<option value="' + i + '">' + m + '</option>'; }).join('');
+      }
+      startSel.innerHTML = opts;
+      endSel.innerHTML = opts;
+    }
+
+    // 套用快捷區間（months=0 代表全部），以今天為終點往前推；同時標記 active 鈕
+    function applyPreset(months) {
+      var startSel = document.getElementById('trendStart');
+      var endSel = document.getElementById('trendEnd');
+      if (trendGran === 'year') {
+        var ys = distinctYears();
+        if (months === 0) { startSel.value = ys[0]; endSel.value = ys[ys.length - 1]; }
+        else {
+          var ny = nowYear(), back = Math.round(months / 12);
+          endSel.value = String(ny);
+          startSel.value = String(Math.max(parseInt(ys[0], 10), ny - (back - 1)));
+        }
+      } else {
+        var n = DATA.months.length;
+        if (months === 0) { startSel.value = 0; endSel.value = n - 1; }
+        else { var nowIdx = nowIndex(); endSel.value = nowIdx; startSel.value = Math.max(0, nowIdx - months); }
+      }
+      document.querySelectorAll('.preset').forEach(function (b) {
+        b.classList.toggle('active', parseInt(b.dataset.months, 10) === months);
+      });
+    }
+
+    function setupTrendControls() {
+      var startSel = document.getElementById('trendStart');
+      var endSel = document.getElementById('trendEnd');
+
+      document.querySelectorAll('.gran').forEach(function (btn) {
+        btn.onclick = function () {
+          if (trendGran === btn.dataset.gran) return;
+          trendGran = btn.dataset.gran;
+          document.querySelectorAll('.gran').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var keep = activePresetMonths();   // 沿用目前的區間長度
+          populateRange();
+          applyPreset(keep);                 // 依新顆粒度重設起/迄
+          renderTrend();
+        };
+      });
+
+      document.querySelectorAll('.preset').forEach(function (btn) {
+        btn.onclick = function () { applyPreset(parseInt(btn.dataset.months, 10)); renderTrend(); };
+      });
+
+      startSel.onchange = function () {
+        if (parseInt(startSel.value, 10) > parseInt(endSel.value, 10)) endSel.value = startSel.value;
+        clearPresetActive(); renderTrend();
+      };
+      endSel.onchange = function () {
+        if (parseInt(endSel.value, 10) < parseInt(startSel.value, 10)) startSel.value = endSel.value;
+        clearPresetActive(); renderTrend();
+      };
+
+      // 初始：月顆粒度、近3年
+      populateRange();
+      applyPreset(36);
+    }
+
     function renderTrend() {
       if (!chartsReady || !DATA) return;
-      var rows = [['月份', '總資產', '總負債', '淨值']];
-      for (var i = 0; i < DATA.months.length; i++) {
-        var t = DATA.totals[i];
-        rows.push([DATA.months[i], t.assets, t.liabilities, t.networth]);
+      var startSel = document.getElementById('trendStart');
+      var endSel = document.getElementById('trendEnd');
+
+      // pts：[{label, assets, liab, net, delta}]，delta = 本期期末淨值 − 上期期末淨值
+      var xLabel, pts = [], pointCount;
+      if (trendGran === 'year') {
+        var sy = parseInt(startSel.value, 10), ey = parseInt(endSel.value, 10);
+        if (isNaN(sy)) sy = -Infinity;
+        if (isNaN(ey)) ey = Infinity;
+        if (sy > ey) { var s = sy; sy = ey; ey = s; }
+        xLabel = '年度';
+        // 全部年份的年末索引（含範圍外，供首個增減值參照去年）
+        var yearEndAll = {};
+        for (var i = 0; i < DATA.months.length; i++) { yearEndAll[parseInt(DATA.months[i].split('-')[0], 10)] = i; }
+        var allYears = Object.keys(yearEndAll).map(Number).sort(function (a, b) { return a - b; });
+        allYears.forEach(function (yy, pos) {
+          if (yy < sy || yy > ey) return;
+          var t = DATA.totals[yearEndAll[yy]];
+          var delta = (pos > 0) ? Math.round(t.networth - DATA.totals[yearEndAll[allYears[pos - 1]]].networth) : null;
+          pts.push({ label: String(yy), assets: t.assets, liab: t.liabilities, net: t.networth, delta: delta });
+        });
+      } else {
+        var start = startSel.value !== '' ? parseInt(startSel.value, 10) : 0;
+        var end = endSel.value !== '' ? parseInt(endSel.value, 10) : DATA.months.length - 1;
+        if (start > end) { var tmp = start; start = end; end = tmp; }
+        xLabel = '月份';
+        for (var j = start; j <= end; j++) {
+          var tm = DATA.totals[j];
+          var d = (j > 0) ? Math.round(tm.networth - DATA.totals[j - 1].networth) : null;  // 對上個月（可含範圍外）
+          pts.push({ label: DATA.months[j], assets: tm.assets, liab: tm.liabilities, net: tm.networth, delta: d });
+        }
       }
-      var data = google.visualization.arrayToDataTable(rows);
+      pointCount = pts.length;
+
+      // 手動建 DataTable：淨值增減用長條並依正負上色，放第二座標軸
+      var dt = new google.visualization.DataTable();
+      dt.addColumn('string', xLabel);
+      dt.addColumn('number', '總資產');
+      dt.addColumn('number', '總負債');
+      dt.addColumn('number', '淨值');
+      dt.addColumn('number', '淨值增減');
+      dt.addColumn({ type: 'string', role: 'style' });
+      var upC = cssVar('--net'), downC = cssVar('--liab');
+      pts.forEach(function (p) {
+        var style = (p.delta == null) ? null : ('color: ' + (p.delta >= 0 ? upC : downC) + '; opacity: 0.55');
+        dt.addRow([p.label, p.assets, p.liab, p.net, p.delta, style]);
+      });
+
       var o = baseOptions();
       o.seriesType = 'area';
       o.series = {
-        0: { type: 'area', color: cssVar('--asset'), areaOpacity: 0.12, lineWidth: 2 },
-        1: { type: 'area', color: cssVar('--liab'), areaOpacity: 0.10, lineWidth: 2 },
-        2: { type: 'line', color: cssVar('--net'), lineWidth: 3 }
+        0: { type: 'area', color: cssVar('--asset'), areaOpacity: 0.12, lineWidth: 2, targetAxisIndex: 0 },
+        1: { type: 'area', color: cssVar('--liab'), areaOpacity: 0.10, lineWidth: 2, targetAxisIndex: 0 },
+        2: { type: 'line', color: cssVar('--net'), lineWidth: 3, targetAxisIndex: 0 },
+        3: { type: 'bars', targetAxisIndex: 1 }
       };
-      o.hAxis.showTextEvery = Math.ceil(DATA.months.length / 8);
+      var muted = cssVar('--muted'), grid = cssVar('--border');
+      o.vAxes = {
+        0: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: grid, count: 5 }, baselineColor: grid, format: 'short' },
+        1: { textStyle: { color: muted, fontSize: 11 }, gridlines: { color: 'transparent' }, baselineColor: grid, format: 'short' }
+      };
+      delete o.vAxis;
+      o.bar = { groupWidth: trendGran === 'year' ? '55%' : '72%' };
+      if (trendGran === 'year') o.pointSize = 5;
+      o.hAxis.showTextEvery = Math.max(1, Math.ceil(pointCount / 8));
+      o.chartArea = { left: 64, right: 60, top: 20, bottom: 44, width: '100%', height: '100%' };
       var chart = new google.visualization.ComboChart(document.getElementById('trendChart'));
-      chart.draw(data, o);
+      chart.draw(dt, o);
     }
 
     /* ---------- 資產組成 ---------- */
