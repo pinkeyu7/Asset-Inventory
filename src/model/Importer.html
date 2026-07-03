@@ -97,7 +97,9 @@ App.Importer = (function () {
     main.forEach(function (t) {
       var iso = '', month = '';
       if (t.Date) {
-        var dt = new Date(t.Date);                // plist 為 UTC(Z)，以 UTC 取值對齊 convert.py
+        // plist 為 UTC(Z)，本人在 +8：加 8 小時位移後以 getUTC* 取當地時間欄位
+        // （避開瀏覽器本機時區的影響），與 convert.py 一致。台灣無日光節約，用固定偏移即可。
+        var dt = new Date(new Date(t.Date).getTime() + 8 * 3600 * 1000);
         iso = dt.getUTCFullYear() + '-' + pad2(dt.getUTCMonth() + 1) + '-' + pad2(dt.getUTCDate()) +
               'T' + pad2(dt.getUTCHours()) + ':' + pad2(dt.getUTCMinutes()) + ':' + pad2(dt.getUTCSeconds());
         month = dt.getUTCFullYear() + '-' + pad2(dt.getUTCMonth() + 1);

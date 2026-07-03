@@ -50,6 +50,13 @@ src/view/        Core_View + View_* + View_Styles
 - 帳戶類型取全名第一字元：`A` 資產、`L` 負債、`I` 收入、`E` 支出。
 - 正確性保證：**Σ資產 − Σ負債 === Σ收入 − Σ支出**（`convert.py` 每次執行都會檢查，差額應為 0）。
 
+### 時區
+
+plist 以 **UTC（`Z`）** 儲存日期，但本人在 **+8**。兩個產生「日期／月份」欄位的地方
+（`tools/convert.py`、`src/model/Importer.html`）都會先把 UTC 轉成 +8 當地時間再取
+`YYYY-MM-DD` / `YYYY-MM`，否則跨午夜的交易會被錯歸到前一天／前一月／前一年。
+台灣無日光節約，採固定 +8 偏移。計算引擎 `Ledger.gs` 只吃 `Month` 字串欄，來源欄位正確即正確。
+
 ## 使用步驟
 
 ### 1. 產生資料 CSV

@@ -14,7 +14,11 @@
     A1 = 借方(debit)、A2 = 貸方(credit)；當 A1 為收入(I) 時借貸互換。
     正確性檢查：總資產 − 總負債 應等於 累積收入 − 累積支出。
 """
-import plistlib, csv, os, sys, collections
+import plistlib, csv, os, sys, collections, datetime
+
+# plist 以 UTC(Z) 儲存日期；本人在 +8，需轉成當地時間再取日期/月份，
+# 否則跨午夜的交易會被錯歸到前一天／前一月／前一年。台灣無日光節約，用固定偏移即可。
+TZ_OFFSET = datetime.timedelta(hours=8)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "import_data", "source.plist")
@@ -47,8 +51,9 @@ tx_path = os.path.join(OUT, "transactions.csv")
 rows = []
 for t in txns:
     d = t.get("Date")
-    iso = d.strftime("%Y-%m-%dT%H:%M:%S") if d else ""
-    month = d.strftime("%Y-%m") if d else ""
+    local = (d + TZ_OFFSET) if d else None   # UTC(Z) → +8 當地時間
+    iso = local.strftime("%Y-%m-%dT%H:%M:%S") if local else ""
+    month = local.strftime("%Y-%m") if local else ""
     rows.append([
         iso, month,
         t.get("Account1", ""), t.get("Account2", ""),
