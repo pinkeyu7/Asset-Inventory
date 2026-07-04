@@ -159,3 +159,34 @@ function buildTimeSeries(txns) {
 }
 
 function round2(x) { return Math.round(x * 100) / 100; }
+
+/**
+ * 會計恆等式驗證（純函式）：Σ資產 − Σ負債 應等於 Σ收入 − Σ支出。
+ * 對正常的複式記帳資料恆為 0；當交易的帳戶全名前綴不是 A/L/I/E（例如上傳解析
+ * 錯位、欄位被推移導致金額落到帳戶欄）時會被排除在四類加總外，差額因而 ≠ 0。
+ * 因此本函式的實際作用是「上傳資料結構是否壞掉」的偵測線，不通過即不應覆寫既有資料。
+ * @param {Array<{account1,account2,amount}>} txns
+ * @return {{ok:boolean, diff:number, assets:number, liabilities:number, income:number, expense:number}}
+ */
+function verifyIdentity(txns) {
+  var bal = {};   // 帳戶全名 -> 累積「正常餘額」
+  for (var i = 0; i < txns.length; i++) {
+    var t = txns[i];
+    var dc = debitCredit(t);
+    var amt = Number(t.amount) || 0;
+    bal[dc.debit]  = (bal[dc.debit]  || 0) + contribution(dc.debit,  true,  amt);
+    bal[dc.credit] = (bal[dc.credit] || 0) + contribution(dc.credit, false, amt);
+  }
+  var sum = { A: 0, L: 0, I: 0, E: 0 };
+  Object.keys(bal).forEach(function (a) {
+    var ty = typeOf(a);
+    if (sum.hasOwnProperty(ty)) sum[ty] += bal[a];
+  });
+  var diff = round2((sum.A - sum.L) - (sum.I - sum.E));
+  return {
+    ok: Math.abs(diff) < 1,
+    diff: diff,
+    assets: round2(sum.A), liabilities: round2(sum.L),
+    income: round2(sum.I), expense: round2(sum.E)
+  };
+}

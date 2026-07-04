@@ -141,14 +141,34 @@ function buildDashboardData_() {
  */
 function importData(payload, code) {
   checkCode_(code);
-  if (!payload || !payload.transactions || !payload.transactions.length) {
+  if (!payload || !payload.transactions || payload.transactions.length < 2) {
     throw new Error('沒有可匯入的交易資料');
+  }
+  // 寫入前先驗會計恆等式：不通過（多半是上傳解析錯位）就中止，避免壞資料覆寫既有資料
+  var check = verifyIdentity(rowsToTxns_(payload.transactions));
+  if (!check.ok) {
+    throw new Error('資料未通過會計恆等式驗證，已中止匯入以保護既有資料'
+      + '（Σ資產−Σ負債=' + (check.assets - check.liabilities)
+      + '，Σ收入−Σ支出=' + (check.income - check.expense)
+      + '，差額=' + check.diff + '）');
   }
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   writeSheet_(ss, TX_SHEET, payload.transactions);
   writeSheet_(ss, ACC_SHEET, payload.accounts || []);
   clearCache();
   return buildDashboardData_();
+}
+
+/** 把上傳的交易列陣列（含表頭：Date,Month,Account1,Account2,Amount,…）轉成驗證用的交易物件。 */
+function rowsToTxns_(rows) {
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {   // 跳過表頭列
+    var r = rows[i];
+    var a1 = String(r[2] || ''), a2 = String(r[3] || '');
+    if (!a1 || !a2) continue;               // 略過空白/補齊列，與 loadTransactions 一致
+    out.push({ account1: a1, account2: a2, amount: Number(r[4]) || 0 });
+  }
+  return out;
 }
 
 /** 以列陣列覆寫指定工作表（不存在則新建）；Month 欄設為純文字避免被轉成日期。 */
