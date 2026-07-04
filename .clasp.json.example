@@ -1,5 +1,5 @@
 {
   "scriptId": "在這裡填入你的 Apps Script 指令碼 ID",
   "rootDir": "src",
-  "deploymentId": "（可選）填入 Web App 部署 ID，供 `make deploy` 更新同一網址；用 `make list-deploys` 查"
+  "deploymentId": "（可選）填入 Web App 部署 ID，供 `make release` 更新同一網址；用 `make list-deploys` 查"
 }

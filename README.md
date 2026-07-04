@@ -71,7 +71,7 @@ make convert    # source.plist → data/*.csv（含恆等式檢查）
 make preview    # 產生並開啟本機預覽（免部署）
 make test       # 執行單元測試
 make push       # 上傳 src/ 到 Apps Script
-make deploy     # push 並更新既有部署（讀 .clasp.json 的 deploymentId）
+make release    # 測試→上傳→更新既有部署（版本描述自動帶 git commit）
 ```
 
 ### 1. 產生資料 CSV
@@ -103,7 +103,8 @@ make preview    # = node tools/make_preview.js + 開啟 preview/index.html（mac
 4. **部署為 Web App**：`clasp create-deployment`（或在編輯器 `部署 → 新增部署 → 網頁應用程式`）。
    - 執行身分＝**部署者（你）**；存取權依需求設定（見下方「存取控制」）。
    - 之後更新：用 `make list-deploys` 查出 deployment ID，填進 `.clasp.json` 的
-     `"deploymentId"` 欄位，往後 `make deploy` 即可重新部署到**同一網址**。
+     `"deploymentId"` 欄位，往後 `make release` 即可重新部署到**同一網址**
+     （會先跑測試，並把 git commit 寫進 GAS 版本描述，方便對回原始碼）。
 
 ### 存取控制與通關密碼
 
