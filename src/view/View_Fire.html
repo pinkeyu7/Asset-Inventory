@@ -1,0 +1,9 @@
+<script>
+// View（FIRE 退休戰略）：靜態策略報告頁。
+//   內容為手寫策略論述（非帳本計算），故不設 Model／ViewModel 層，也無 render/wire——
+//   報告 HTML 已直接寫在 index.html 的 <section id="view-fire">，這裡只向核心註冊，
+//   讓分頁切換能連帶顯示/隱藏此頁（配色由 View_Styles 的 #view-fire 區塊處理）。
+(function () {
+  App.View.registerPage({ name: 'fire' });
+})();
+</script>

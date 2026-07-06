@@ -90,4 +90,54 @@
   thead th { color: var(--muted); font-weight: 600; }
   .spin { display:inline-block; width:22px; height:22px; border:3px solid var(--border); border-top-color: var(--accent); border-radius:50%; animation: r 1s linear infinite; }
   @keyframes r { to { transform: rotate(360deg); } }
+
+  /* ---------- FIRE 退休戰略報告（靜態頁；固定配色對應主題變數，深/淺色皆可讀）---------- */
+  #view-fire { line-height: 1.65; --fire-gold: #c5a880; --fire-navy: #1a365d; --fire-warn: #c05621; --fire-info: #2b6cb0; }
+  @media (prefers-color-scheme: dark) {
+    #view-fire { --fire-warn: #f0a868; --fire-info: #6fa8e6; }
+  }
+  /* 深藍金 hero／結語：兩種主題都維持識別色 */
+  #view-fire .header-banner { background: var(--fire-navy); color: #fff; padding: 26px 28px; border-bottom: 5px solid var(--fire-gold); border-radius: 14px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  #view-fire .header-banner h1 { font-size: 22px; margin: 0 0 12px; font-weight: 700; color: #fff; }
+  #view-fire .meta-info { font-size: 13px; color: #cbd5e0; margin: 4px 0; }
+  #view-fire .meta-info strong { color: #e2e8f0; }
+  #view-fire .verdict { margin-top: 14px; padding-top: 12px; border-top: 1px solid #2c5282; font-size: 15px; color: #f0fff4; font-weight: 700; }
+  #view-fire .fire-closing { background: var(--fire-navy); color: #e2e8f0; padding: 26px 28px; border-top: 5px solid var(--fire-gold); border-radius: 14px; margin: 22px 0 0; line-height: 1.85; }
+  #view-fire .fire-closing p { margin: 0 0 14px; }
+  #view-fire .fire-closing p.last { margin: 0; }
+  #view-fire .fire-closing strong.w { color: #fff; }
+  #view-fire .fire-closing strong.g { color: var(--fire-gold); }
+  #view-fire .fire-closing strong.big { font-size: 1.15em; }
+
+  /* 標題／內文 */
+  #view-fire h2 { font-size: 18px; color: var(--text); border-left: 5px solid var(--fire-gold); padding-left: 12px; margin: 34px 0 14px; }
+  #view-fire h3 { font-size: 15px; color: var(--accent); margin: 22px 0 10px; }
+  #view-fire p { margin: 12px 0; }
+  #view-fire ul { margin: 12px 0; padding-left: 22px; }
+  #view-fire li { margin: 6px 0; }
+  #view-fire .bold { font-weight: bold; }
+  #view-fire .text-center { text-align: center; }
+  #view-fire .neg { color: var(--liab); font-weight: bold; }
+
+  /* 表格：左對齊、實線框、深色表頭；語意色用 --net/--liab */
+  #view-fire .table-wrap { overflow-x: auto; }
+  #view-fire table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13px; }
+  #view-fire th, #view-fire td { padding: 10px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+  #view-fire thead th { background: #2d3748; color: #fff; font-weight: 600; }
+  #view-fire tbody tr:nth-child(even) { background: rgba(127,127,127,.06); }
+  #view-fire .win-header { background: var(--net) !important; color: #fff !important; }
+  #view-fire .highlight-cell { background: rgba(23,166,115,.14) !important; font-weight: bold; border-color: var(--net); color: var(--net); }
+  #view-fire .total-row { background: rgba(127,127,127,.12) !important; font-weight: bold; }
+
+  /* 提示框：半透明底色疊在頁面上，深/淺皆自然 */
+  #view-fire .alert-callout, #view-fire .callout, #view-fire .conclusion, #view-fire .note {
+    padding: 14px 16px; margin: 18px 0; border-radius: 8px; border-left: 4px solid var(--muted);
+  }
+  #view-fire .alert-callout { background: rgba(221,107,32,.10); border-left-color: var(--fire-warn); }
+  #view-fire .callout { background: rgba(49,130,206,.10); border-left-color: var(--fire-info); }
+  #view-fire .conclusion { background: rgba(23,166,115,.12); border-left-color: var(--net); }
+  #view-fire .note { background: rgba(127,127,127,.08); border-left-color: var(--muted); font-size: 13px; color: var(--muted); }
+  #view-fire .alert-callout > .bold { color: var(--fire-warn); margin-bottom: 4px; }
+  #view-fire .callout > .bold { color: var(--fire-info); margin-bottom: 4px; }
+  #view-fire .conclusion > .bold { color: var(--net); margin-bottom: 4px; }
 </style>

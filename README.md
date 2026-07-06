@@ -1,6 +1,6 @@
 # 個人資產變化紀錄
 
-把記帳 App 匯出的複式記帳資料，變成一個可視化的個人淨值儀表板 —— 五個畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析**（含各來源年度比較，固定配色）。以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
+把記帳 App 匯出的複式記帳資料，變成一個可視化的個人淨值儀表板 —— 五個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析**（含各來源年度比較，固定配色），外加一頁靜態的 **FIRE 退休戰略報告**（手寫策略論述，不接帳本計算）。以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
 
 ## 架構
 
@@ -37,6 +37,11 @@ src/view/        Core_View + View_* + View_Styles
 
 **頁面註冊**：每個 `View_XXX` 以 `App.View.registerPage({name, render, wire, beforeInit, reload})` 向核心註冊；
 核心負責分頁切換、初次/重載時依序呼叫各頁 hook。新增一頁＝三層各加一個 `*_XXX.html` 檔並註冊，不必改核心。
+
+**靜態頁例外（FIRE 規劃）**：純論述、不接帳本計算的頁面不需要 Model/ViewModel，也沒有 render/wire——
+只以 `registerPage({name})` 向核心註冊以納入分頁切換即可。其內容是一份純 markup 片段（`view/View_Fire_Report.html`），
+由 `index.html` 的 `<section id="view-fire">` 以 `include()` 組入；配色樣式集中在 `View_Styles.html` 的 `#view-fire` 區塊，
+對應主題變數以支援深/淺色。
 
 資料載入有兩條路：GAS 版走 `google.script.run.getDashboardData(密碼)`；本機預覽走 `window.PRELOADED_DATA`（由 `make_preview.js` 注入）。
 
@@ -162,5 +167,6 @@ make test            # = node --test（執行 tests/ledger.test.js）
 | `src/model/Importer.html` | Model：解析 plist → 列陣列（與 `convert.py` 同結果） |
 | `src/viewmodel/Core_ViewModel.html` · `src/viewmodel/ViewModel_*.html` | ViewModel 核心（observable/init）+ 各頁狀態命令 |
 | `src/view/Core_View.html` · `src/view/View_*.html` | View 核心（工具/分頁/上傳/密碼/啟動）+ 各頁 render/wire |
-| `src/view/View_Styles.html` | 樣式（CSS） |
+| `src/view/View_Fire.html` · `src/view/View_Fire_Report.html` | FIRE 靜態頁：前者向核心註冊分頁，後者為報告內容（純 markup） |
+| `src/view/View_Styles.html` | 樣式（CSS，含 FIRE 頁 `#view-fire` 配色） |
 | `src/appsscript.json` | GAS 專案設定 |

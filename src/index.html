@@ -36,6 +36,7 @@
         <button class="tab" data-view="monthly">📅 月度收支</button>
         <button class="tab" data-view="yearly">📊 年度收支</button>
         <button class="tab" data-view="income">💰 收入來源</button>
+        <button class="tab" data-view="fire">🏡 FIRE 規劃</button>
       </div>
 
       <!-- 淨值趨勢 -->
@@ -132,6 +133,11 @@
           <div id="incomeTrendChart" class="chart tall"></div>
         </div>
       </section>
+
+      <!-- FIRE 退休戰略（靜態報告，配色吃深/淺主題） -->
+      <section id="view-fire" class="hidden">
+        <?!= include('view/View_Fire_Report') ?>
+      </section>
     </div>
     <div id="error" class="hidden"></div>
   </div>
@@ -163,6 +169,7 @@
   <?!= include('view/View_Monthly') ?>
   <?!= include('view/View_Yearly') ?>
   <?!= include('view/View_Income') ?>
+  <?!= include('view/View_Fire') ?>
 
   <script>App.View.boot();</script>
 </body>
