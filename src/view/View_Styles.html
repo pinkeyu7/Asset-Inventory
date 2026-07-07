@@ -21,7 +21,14 @@
   header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
   h1 { font-size: 20px; margin: 0; font-weight: 700; }
   .sub { color: var(--muted); font-size: 12px; }
-  .upload { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  /* 設定：齒輪按鈕 + 彈出面板（右上角 dropdown） */
+  .settings { position: relative; }
+  .settings-btn { border: 1px solid var(--border); background: var(--card); color: var(--text); width: 38px; height: 38px; border-radius: 999px; cursor: pointer; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  .settings-btn:hover { border-color: var(--accent); }
+  .settings-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 260px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .settings-section { display: flex; flex-direction: column; gap: 8px; }
+  .settings-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+  .upload { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
   .upload-btn {
     border: 1px solid var(--accent); background: var(--accent); color: #fff;
     padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600;
@@ -97,7 +104,14 @@
     #view-fire { --fire-warn: #f0a868; --fire-info: #6fa8e6; }
   }
   /* 深藍金 hero／結語：兩種主題都維持識別色 */
-  #view-fire .header-banner { background: var(--fire-navy); color: #fff; padding: 26px 28px; border-bottom: 5px solid var(--fire-gold); border-radius: 14px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  #view-fire .header-banner { position: relative; background: var(--fire-navy); color: #fff; padding: 26px 28px; border-bottom: 5px solid var(--fire-gold); border-radius: 14px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  /* 匯出 Markdown：hero 右上角的低調金色描邊小按鈕 */
+  #view-fire .fire-export-btn { position: absolute; top: 20px; right: 20px; background: transparent; color: var(--fire-gold); border: 1px solid var(--fire-gold); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+  #view-fire .fire-export-btn:hover { background: var(--fire-gold); color: var(--fire-navy); }
+  /* 窄螢幕：改為正常排列，避免壓到長標題 */
+  @media (max-width: 640px) {
+    #view-fire .fire-export-btn { position: static; display: inline-block; margin-bottom: 14px; }
+  }
   #view-fire .header-banner h1 { font-size: 22px; margin: 0 0 12px; font-weight: 700; color: #fff; }
   #view-fire .meta-info { font-size: 13px; color: #cbd5e0; margin: 4px 0; }
   #view-fire .meta-info strong { color: #e2e8f0; }

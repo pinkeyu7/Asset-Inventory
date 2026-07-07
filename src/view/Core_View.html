@@ -48,6 +48,7 @@ App.View = (function () {
   }
   function showEmpty() {
     $('loading').classList.add('hidden'); $('app').classList.add('hidden');
+    if ($('settings')) $('settings').classList.remove('hidden');
     if ($('upload')) $('upload').classList.remove('hidden');
     var el = $('error'); el.classList.remove('hidden'); el.className = 'note';
     el.textContent = '尚無資料。請點右上角「⬆️ 上傳 source.plist」匯入你的記帳檔。';
@@ -59,6 +60,7 @@ App.View = (function () {
     if (M.isEmpty()) { showEmpty(); return; }
     $('error').classList.add('hidden'); $('loading').classList.add('hidden');
     $('app').classList.remove('hidden');
+    if ($('settings')) $('settings').classList.remove('hidden');
     if ($('upload')) $('upload').classList.remove('hidden');
     pages.forEach(function (p) { if (p.beforeInit) p.beforeInit(); });   // 例：趨勢頁先建起/迄選項
     VM.init();
@@ -114,6 +116,22 @@ App.View = (function () {
     };
   }
 
+  // ---------- 設定面板（齒輪 dropdown）----------
+  function wireSettings() {
+    var btn = $('settingsBtn'), panel = $('settingsPanel');
+    if (!btn || !panel) return;
+    function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+    btn.onclick = function (e) {
+      e.stopPropagation();
+      var nowHidden = panel.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', nowHidden ? 'false' : 'true');
+    };
+    document.addEventListener('click', function (e) {   // 點面板外關閉
+      if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+
   // ---------- 通關密碼 ----------
   function showGate() {
     $('gate').classList.remove('hidden');
@@ -161,6 +179,7 @@ App.View = (function () {
     }
     window.addEventListener('resize', function () { renderActive(); });
     wireUpload();
+    wireSettings();
     wireGate();
   }
 

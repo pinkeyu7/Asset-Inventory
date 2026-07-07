@@ -10,12 +10,22 @@
     <header>
       <div>
         <h1>個人資產變化紀錄</h1>
-        <div class="sub" id="meta"></div>
       </div>
-      <div class="upload hidden" id="upload">
-        <input type="file" id="plistFile" accept=".plist,.xml,text/xml" hidden>
-        <button class="upload-btn" id="uploadBtn">⬆️ 上傳 source.plist</button>
-        <span class="upload-status" id="uploadStatus"></span>
+      <!-- 設定：齒輪圖示點開面板，內含資料狀態與「上傳 source.plist」（久久一次的維護動作，不佔主畫面）。 -->
+      <div class="settings hidden" id="settings">
+        <button class="settings-btn" id="settingsBtn" type="button" aria-label="設定" aria-expanded="false" aria-controls="settingsPanel">⚙️</button>
+        <div class="settings-panel hidden" id="settingsPanel">
+          <div class="settings-section">
+            <div class="settings-label">資料狀態</div>
+            <div class="sub" id="meta"></div>
+          </div>
+          <div class="settings-section upload hidden" id="upload">
+            <div class="settings-label">更新資料</div>
+            <input type="file" id="plistFile" accept=".plist,.xml,text/xml" hidden>
+            <button class="upload-btn" id="uploadBtn">⬆️ 上傳 source.plist</button>
+            <span class="upload-status" id="uploadStatus"></span>
+          </div>
+        </div>
       </div>
     </header>
 
