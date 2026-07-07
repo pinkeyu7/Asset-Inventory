@@ -19,6 +19,7 @@
     });
     items.sort(function (a, b) { return b.value - a.value; });
     var total = items.reduce(function (s, it) { return s + it.value; }, 0);
+    items.forEach(function (it) { it.pct = total ? it.value / total * 100 : 0; });
     return { month: D.months[idx], items: items, total: total };
   };
 })();

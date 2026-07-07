@@ -4,43 +4,27 @@
   var V = App.View, VM = App.ViewModel, M = App.Model;
 
   var INCOME_PALETTE = ['#17a673', '#2f6df6', '#f5a623', '#8a5cf6', '#12a4b8', '#e0533d', '#d94f9a', '#6b7280', '#3fb27f', '#c98a2b'];
-  var incomeColorMap = null;
-  function ensureIncomeColors() {
-    if (incomeColorMap) return;
-    incomeColorMap = {};
-    M.incomeAccounts().forEach(function (full, i) { incomeColorMap[full] = INCOME_PALETTE[i % INCOME_PALETTE.length]; });
-  }
+  var colors = V.makeColorMap(INCOME_PALETTE);
 
   function render() {
     if (!V.chartsReady()) return;
-    ensureIncomeColors();
+    colors.ensure(M.incomeAccounts());
     var c = VM.incomeData();
-    var o = V.baseOptions();
-    o.chartArea = { left: 10, right: 10, top: 20, bottom: 20, width: '100%', height: '86%' };
-    o.pieHole = 0.55;
-    o.legend = { position: 'right', textStyle: { color: V.cssVar('--text'), fontSize: 12 }, alignment: 'center' };
-    o.pieSliceText = 'percentage';
-    o.pieSliceTextStyle = { color: '#fff', fontSize: 11 };
-    o.tooltip = { text: 'value' };
-    o.colors = c.items.map(function (it) { return incomeColorMap[it.full]; });
+    var o = V.donutOptions();
+    o.colors = c.items.map(function (it) { return colors.of(it.full); });
     if (!c.items.length) { V.$('incomeChart').innerHTML = '<p class="hint">該期間無收入</p>'; }
     else {
       var rows = [['來源', '金額']];
       c.items.forEach(function (it) { rows.push([it.short, it.value]); });
       new google.visualization.PieChart(V.$('incomeChart')).draw(google.visualization.arrayToDataTable(rows), o);
     }
-    var html = '<table><thead><tr><th>收入來源</th><th>金額</th><th>佔比</th></tr></thead><tbody>';
-    c.items.forEach(function (it) {
-      html += '<tr><td>' + it.short + '</td><td>' + V.fmtFull(it.value) + '</td><td>' + (c.total ? (it.value / c.total * 100).toFixed(1) : 0) + '%</td></tr>';
-    });
-    html += '<tr><td><b>合計</b></td><td><b>' + V.fmtFull(c.total) + '</b></td><td>100%</td></tr></tbody></table>';
-    V.$('incomeTable').innerHTML = html;
+    V.$('incomeTable').innerHTML = V.breakdownTableHtml('收入來源', c.items, c.total);
     renderTrend();
   }
 
   function renderTrend() {
     if (!V.chartsReady()) return;
-    ensureIncomeColors();
+    colors.ensure(M.incomeAccounts());
     var t = VM.incomeTrendData();
     if (!t.years.length || !t.accounts.length) { V.$('incomeTrendChart').innerHTML = ''; return; }
     var rows = [['年度'].concat(t.accounts.map(function (a) { return a.short; }))];
@@ -49,13 +33,13 @@
     o.isStacked = true;
     o.bar = { groupWidth: '70%' };
     o.legend = { position: 'top', maxLines: 3, textStyle: { color: V.cssVar('--text'), fontSize: 11 } };
-    o.colors = t.accounts.map(function (a) { return incomeColorMap[a.full]; });
+    o.colors = t.accounts.map(function (a) { return colors.of(a.full); });
     o.hAxis.showTextEvery = 1;
     new google.visualization.ColumnChart(V.$('incomeTrendChart')).draw(google.visualization.arrayToDataTable(rows), o);
   }
 
   function populateYears() {
-    incomeColorMap = null;                 // 重建配色（上傳新資料後帳戶可能改變）
+    colors.reset();                        // 重建配色（上傳新資料後帳戶可能改變）
     V.$('incomeYear').innerHTML = '<option value="ALL">全部</option>' +
       M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
     V.$('incomeYear').value = VM.incomeYear();

@@ -8,24 +8,14 @@
     var yearly = VM.yearlyData();
     var rows = [['年度', '收入', '支出', '淨結餘']];
     yearly.forEach(function (y) { rows.push([y.year, y.income, y.expense, y.net]); });
-    var o = V.baseOptions();
-    o.seriesType = 'bars';
-    o.series = {
-      0: { type: 'bars', color: V.cssVar('--net') },
-      1: { type: 'bars', color: V.cssVar('--liab') },
-      2: { type: 'line', color: V.cssVar('--accent'), lineWidth: 3, pointSize: 4 }
-    };
-    o.bar = { groupWidth: '62%' };
-    o.legend = { position: 'top', textStyle: { color: V.cssVar('--text'), fontSize: 12 } };
+    var o = V.incomeExpenseNetOptions();
     new google.visualization.ComboChart(V.$('yearlyChart')).draw(google.visualization.arrayToDataTable(rows), o);
 
-    var html = '<table><thead><tr><th>年度</th><th>收入</th><th>支出</th><th>淨結餘</th></tr></thead><tbody>';
-    yearly.slice().reverse().forEach(function (y) {
-      html += '<tr><td>' + y.year + '</td><td>' + V.fmtFull(y.income) + '</td><td>' + V.fmtFull(y.expense) +
-              '</td><td class="' + (y.net >= 0 ? 'up' : 'down') + '">' + V.fmtFull(y.net) + '</td></tr>';
+    // 明細表最新年份在上（顯示順序，非資料順序）
+    var tableRows = yearly.slice().reverse().map(function (y) {
+      return { label: y.year, income: y.income, expense: y.expense, net: y.net };
     });
-    html += '</tbody></table>';
-    V.$('yearlyTable').innerHTML = html;
+    V.$('yearlyTable').innerHTML = V.incomeExpenseNetTableHtml('年度', tableRows);
   }
 
   V.registerPage({ name: 'yearly', render: render });

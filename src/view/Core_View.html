@@ -31,6 +31,65 @@ App.View = (function () {
       tooltip: { textStyle: { fontSize: 12 } }
     };
   }
+  // 依帳戶固定配色：給一組調色盤，回傳可記憶的對應器（上傳新資料後 reset 重建）
+  function makeColorMap(palette) {
+    var map = null;
+    return {
+      reset: function () { map = null; },
+      ensure: function (accounts) {
+        if (map) return;
+        map = {};
+        accounts.forEach(function (full, i) { map[full] = palette[i % palette.length]; });
+      },
+      of: function (full) { return map ? map[full] : undefined; }
+    };
+  }
+
+  // 環圈圖共用選項（組成頁 / 收入頁）；呼叫端自行補上 o.colors
+  function donutOptions() {
+    var o = baseOptions();
+    o.chartArea = { left: 10, right: 10, top: 20, bottom: 20, width: '100%', height: '86%' };
+    o.pieHole = 0.55;
+    o.legend = { position: 'right', textStyle: { color: cssVar('--text'), fontSize: 12 }, alignment: 'center' };
+    o.pieSliceText = 'percentage';
+    o.pieSliceTextStyle = { color: '#fff', fontSize: 11 };
+    o.tooltip = { text: 'value' };
+    return o;
+  }
+
+  // 收入/支出/淨結餘 ComboChart 共用選項（月度頁 / 年度頁）
+  function incomeExpenseNetOptions() {
+    var o = baseOptions();
+    o.seriesType = 'bars';
+    o.series = {
+      0: { type: 'bars', color: cssVar('--net') },
+      1: { type: 'bars', color: cssVar('--liab') },
+      2: { type: 'line', color: cssVar('--accent'), lineWidth: 3, pointSize: 4 }
+    };
+    o.bar = { groupWidth: '62%' };
+    o.legend = { position: 'top', textStyle: { color: cssVar('--text'), fontSize: 12 } };
+    return o;
+  }
+
+  // 佔比明細表 HTML（組成頁 / 收入頁）：items 需含 short/value/pct，末列自動加合計
+  function breakdownTableHtml(firstColLabel, items, total) {
+    var html = '<table><thead><tr><th>' + firstColLabel + '</th><th>金額</th><th>佔比</th></tr></thead><tbody>';
+    items.forEach(function (it) {
+      html += '<tr><td>' + it.short + '</td><td>' + fmtFull(it.value) + '</td><td>' + it.pct.toFixed(1) + '%</td></tr>';
+    });
+    return html + '<tr><td><b>合計</b></td><td><b>' + fmtFull(total) + '</b></td><td>100%</td></tr></tbody></table>';
+  }
+
+  // 收入/支出/淨結餘明細表 HTML（月度頁 / 年度頁）：rows 為 [{label,income,expense,net}]，順序即顯示順序
+  function incomeExpenseNetTableHtml(firstColLabel, rows) {
+    var html = '<table><thead><tr><th>' + firstColLabel + '</th><th>收入</th><th>支出</th><th>淨結餘</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      html += '<tr><td>' + r.label + '</td><td>' + fmtFull(r.income) + '</td><td>' + fmtFull(r.expense) +
+              '</td><td class="' + (r.net >= 0 ? 'up' : 'down') + '">' + fmtFull(r.net) + '</td></tr>';
+    });
+    return html + '</tbody></table>';
+  }
+
   function isReady() { return chartsReady; }
 
   function registerPage(p) { pages.push(p); }
@@ -198,6 +257,8 @@ App.View = (function () {
 
   return {
     $: $, cssVar: cssVar, fmtFull: fmtFull, fmtWan: fmtWan, baseOptions: baseOptions,
+    makeColorMap: makeColorMap, donutOptions: donutOptions, incomeExpenseNetOptions: incomeExpenseNetOptions,
+    breakdownTableHtml: breakdownTableHtml, incomeExpenseNetTableHtml: incomeExpenseNetTableHtml,
     chartsReady: isReady, registerPage: registerPage, renderActive: renderActive, boot: boot
   };
 })();
