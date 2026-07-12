@@ -1,0 +1,237 @@
+<!-- 不動產投資報酬率分析報告（靜態內容）：由 index.html 的 <section id="view-realty"> 以 include 組入。
+     手寫分析、非帳本計算；配色樣式共用 View_Styles 的 .report 區塊。 -->
+<div class="header-banner">
+  <!-- 匯出 Markdown：與 FIRE 報告共用 App.View.bindReportExport；data-md-skip 使其不納入轉換。 -->
+  <button id="realtyExportBtn" class="report-export-btn" type="button" data-md-skip>⬇️ 匯出 Markdown</button>
+  <h1>🏘️ 不動產投資報酬率分析報告</h1>
+  <p class="meta-info"><strong>標的：</strong> 純出租不動產（含房貸槓桿）</p>
+  <p class="meta-info"><strong>持有期間：</strong> 5 年</p>
+  <p class="meta-info"><strong>分析基準日：</strong> 2026-07-08</p>
+  <p class="verdict">稅前自有資金 IRR ≈ 17.4%／年（稅後約 14%）；約 92.5% 獲利來自房價增值，屬「賺價差」型投資</p>
+</div>
+
+<h2>📋 一、基本資料</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>項目</th><th>金額（萬）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>原始購買價</td><td>1,620</td></tr>
+    <tr><td>頭期款（自有資金）</td><td>482</td></tr>
+    <tr><td>貸款金額</td><td>1,138</td></tr>
+    <tr><td class="bold">目前市場價值</td><td class="bold">2,250</td></tr>
+    <tr><td class="bold">目前貸款餘額</td><td class="bold">870</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">📎 <strong>帳目驗證：</strong> 貸款 1,138 − 償還本金 268 = 870 = 目前貸款餘額 ✓（數字一致）</div>
+
+<h3>五年期間累計現金流</h3>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>項目</th><th>金額（萬）</th><th>現金方向</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>償還本金</td><td>268</td><td>流出</td></tr>
+    <tr><td>利息及其他支出</td><td>220</td><td>流出</td></tr>
+    <tr><td>租金收入</td><td>271</td><td class="bold">流入</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">「利息及其他支出 220 萬」已包含：房貸利息、所有稅費（房屋稅、地價稅等）、設備維修費、管理費等<strong>全部持有成本</strong>。故「租金 271 − 支出 220 = 51 萬」為完全淨額。</div>
+
+<h2>🧮 二、計算方法說明</h2>
+<p>這是一筆<strong>有房貸槓桿的投資</strong>，因此「年化報酬率」不應看房價漲幅，而應計算<strong>自有資金（Equity）的報酬率</strong>，並採用 <strong>IRR（內部報酬率 / 金額加權報酬率）</strong> 來年化。</p>
+<p>原因：投入的資金不是一次到位，期間持續在還本金、繳利息、收租金，最後才回收本利。IRR 會把「每一筆錢投入 / 回收的時間點」都納入計算，是評估此類投資最正確的年化指標。</p>
+
+<h3>步驟 1：釐清自有資金的現金流</h3>
+<ul>
+  <li><strong>期初投入（第 0 年）：</strong> 頭期款 482 萬（＝ 1,620 − 1,138；購置費用另計入期間的 220 萬支出中）</li>
+</ul>
+<p><strong>期間五年淨流出（＝期間淨投入）：</strong></p>
+<pre class="formula">租金收入 271 − 利息及支出 220 − 償還本金 268 = −217 萬
+平均每年約 −43.4 萬</pre>
+<div class="note">說明：這 217 萬是「同一筆錢的兩種說法」——從房子角度看是現金<strong>流出</strong>；從投資人角度看，就是這五年陸續<strong>再投入</strong>的自有資金。兩者金額相同。</div>
+<p><strong>期末回收（第 5 年，以現價視為已實現）：</strong></p>
+<pre class="formula">賣出可回收自有資金 = 現值 2,250 − 貸款餘額 870 = 1,380 萬</pre>
+
+<h3>步驟 2：建立現金流序列（單位：萬）</h3>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>時點</th><th>現金流</th><th>說明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>第 0 年</td><td class="neg">−482.0</td><td>頭期款</td></tr>
+    <tr><td>第 1 年</td><td class="neg">−43.4</td><td>期間淨流出＝淨投入（平均分攤）</td></tr>
+    <tr><td>第 2 年</td><td class="neg">−43.4</td><td>同上</td></tr>
+    <tr><td>第 3 年</td><td class="neg">−43.4</td><td>同上</td></tr>
+    <tr><td>第 4 年</td><td class="neg">−43.4</td><td>同上</td></tr>
+    <tr><td>第 5 年</td><td class="bold">+1,336.6</td><td>−43.4 ＋ 期末回收 1,380</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>步驟 3：求解 IRR</h3>
+<p>找出使淨現值（NPV）＝ 0 的折現率 r：</p>
+<pre class="formula">NPV = Σ  CFₜ / (1 + r)ᵗ  = 0   （t = 0 ~ 5）</pre>
+<p>解得 <strong>r ≈ 17.37%</strong>。</p>
+
+<h2>📈 三、計算結果</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>指標</th><th>數值</th><th>用途</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="bold">自有資金 IRR（年化）</td><td class="highlight-cell">≈ 17.37% / 年</td><td><strong>建議採用</strong>（金額加權、最精準）</td></tr>
+    <tr><td>總淨利</td><td>681 萬</td><td>1,380 − 總投入 699</td></tr>
+    <tr><td>總投入自有資金</td><td>699 萬</td><td>頭期款 482 ＋ 期間淨投入 217（＝期間淨流出）</td></tr>
+    <tr><td>五年總報酬率</td><td>97.4%</td><td>總淨利 ÷ 總投入</td></tr>
+    <tr><td>簡單年化報酬率</td><td>≈ 14.57% / 年</td><td>僅供對照（低估，未計資金投入時點）</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="callout">
+  <div class="bold">為何 IRR（17.4%）高於簡單年化（14.6%）？</div>
+  <p>因為 482 萬頭期款整整投入 5 年，而後續補入的資金只投入較短時間。簡單年化把所有資金都視為「一開始就投入」，因此低估報酬；IRR 才是精準值。</p>
+</div>
+
+<h3>槓桿效果</h3>
+<ul>
+  <li>房價本身年化漲幅：(2,250 / 1,620)^(1/5) − 1 ≈ <strong>6.8% / 年</strong></li>
+  <li>透過房貸槓桿，自有資金報酬被放大至 ≈ <strong>17.4% / 年</strong></li>
+  <li>代價：報酬對房價變動高度敏感，為此投資的主要風險來源。</li>
+</ul>
+
+<h2>🔍 四、報酬來源分析：純租金報酬率 vs 總報酬率</h2>
+<p>把報酬拆成「租金收益」與「房價增值」兩塊，可以看清這筆投資的獲利到底來自哪裡。</p>
+
+<h3>純租金報酬率（收益報酬，不含增值）</h3>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>指標</th><th>數值</th><th>算式</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>毛租金報酬率（對目前房價）</td><td class="bold">2.41% / 年</td><td>年租金 54.2 ÷ 2,250</td></tr>
+    <tr><td>毛租金報酬率（對原始房價）</td><td>3.35% / 年</td><td>年租金 54.2 ÷ 1,620</td></tr>
+    <tr><td class="bold">淨租金報酬率（對目前房價）</td><td class="bold">0.45% / 年</td><td>完全淨額 10.2 ÷ 2,250</td></tr>
+    <tr><td>自有資金現金報酬率（cash-on-cash）</td><td>2.12% / 年</td><td>完全淨額 10.2 ÷ 頭期款 482</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">完全淨額 = 租金 271 − 全部支出 220 = 51 萬（五年），平均每年約 10.2 萬。</div>
+
+<h3>總報酬率 vs 純租金報酬率</h3>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>報酬來源</th><th>五年金額（萬）</th><th>佔總獲利比重</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>房價增值</td><td>630（2,250 − 1,620）</td><td class="bold">約 92.5%</td></tr>
+    <tr><td>淨租金收益</td><td>51</td><td>約 7.5%</td></tr>
+    <tr class="total-row"><td>合計淨利</td><td>681</td><td>100%</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="conclusion">
+  <div class="bold">✅ 關鍵結論：這筆投資約 92.5% 的獲利來自房價增值，租金僅略高於打平持有成本。</div>
+  <ul>
+    <li>總報酬率（含增值）IRR ≈ <strong>17.37% / 年</strong>。</li>
+    <li>若房價完全沒漲，報酬將趨近於零——這是本投資最主要的風險。</li>
+    <li>高總報酬並非來自穩定的租金現金流，而是高度依賴房市價格，屬於「賺價差」而非「賺收益」型的投資。</li>
+  </ul>
+</div>
+
+<h2>💸 五、稅後 / 賣出實現後情境（估計）</h2>
+<p>前述 17.37% 為<strong>稅前、且未扣賣出成本</strong>的帳面報酬。若現在實際賣出變現，需扣除：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>項目</th><th>估計金額（萬）</th><th>說明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>房地合一稅</td><td class="neg">約 105 ~ 135</td><td>持有滿 5 年未滿 10 年，稅率約 20%，就增值約 630 萬課徵（實際可再扣土地漲價總數額與費用）</td></tr>
+    <tr><td>仲介費</td><td class="neg">約 34 ~ 45</td><td>成交價 2,250 的 1.5% ~ 2%</td></tr>
+    <tr><td>代書、雜費</td><td class="neg">約 5</td><td>—</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>估計實際落袋 IRR：</strong></p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>情境</th><th>賣出總成本（萬）</th><th>期末實拿（萬）</th><th>稅後 IRR</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>樂觀</td><td>144</td><td>1,236</td><td class="bold">≈ 14.5% / 年</td></tr>
+    <tr><td>中性</td><td>159</td><td>1,221</td><td class="bold">≈ 14.1% / 年</td></tr>
+    <tr><td>保守</td><td>185</td><td>1,195</td><td class="bold">≈ 13.6% / 年</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note"><strong>稅後真實報酬率大約落在 14% / 年</strong>（相較稅前 17.4%）。房地合一稅為金額最大的單一項目，實際稅額須依土地漲價總數額、可列舉費用等由會計師/地政士試算，本表僅為量級估計。</div>
+
+<h2>📌 六、假設與注意事項</h2>
+<ol>
+  <li><strong>平均分攤假設：</strong> 租金收入與各項支出假設 5 年間平均發生。若有逐年明細，IRR 可更精準。</li>
+  <li><strong>現價實現假設：</strong> 第三節的稅前 IRR 以目前市價 2,250 萬視為可變現、僅扣除貸款餘額，屬<strong>帳面（未實現）報酬</strong>；實際賣出的稅後報酬請見第五節。</li>
+  <li><strong>支出範圍：</strong> 「利息及其他支出 220 萬」已涵蓋房貸利息、房屋稅、地價稅、設備維修、管理費，<strong>以及當初買進時的契稅、代書、裝修等購置成本</strong>，為完整的持有＋取得成本。</li>
+  <li><strong>購置成本的時點簡化：</strong> 購置成本雖屬期初一次性支出，但因併入 220 萬並以 5 年平均分攤，計算上略微延後認列；金額佔比小，對 IRR 影響極微。</li>
+  <li><strong>稅費為估計值：</strong> 第五節房地合一稅等為量級估計，實際須由專業人士依個案試算。</li>
+  <li>本報告數字單位皆為「萬（新台幣）」。</li>
+</ol>
+
+<h2>🧾 附錄：驗算程式（Python）</h2>
+<details>
+  <summary>展開驗算程式碼</summary>
+<pre>def npv(r, cfs):
+    return sum(cf / (1 + r) ** t for t, cf in enumerate(cfs))
+
+def irr(cfs):
+    """二分法求 IRR"""
+    lo, hi = -0.9, 2.0
+    for _ in range(300):
+        mid = (lo + hi) / 2
+        if npv(mid, cfs) > 0:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+# ---- 輸入資料（單位：萬）----
+down = 482          # 頭期款
+rent = 271          # 五年租金收入
+interest_exp = 220  # 五年利息及其他支出（含購置成本、稅費、維修、管理）
+principal = 268     # 五年償還本金
+value = 2250        # 目前市場價值
+loan = 870          # 目前貸款餘額
+purchase = 1620     # 原始購買價
+
+# ---- (A) 純租金報酬率（不含增值）----
+net_rent = rent - interest_exp        # 完全淨額 = 51（五年）
+ann_rent = rent / 5                    # 毛租金 54.2 / 年
+ann_net_rent = net_rent / 5            # 淨租金 10.2 / 年
+print("毛租金報酬率(對現價):        %.2f%%" % (ann_rent / value * 100))       # 2.41%
+print("毛租金報酬率(對原價):        %.2f%%" % (ann_rent / purchase * 100))    # 3.35%
+print("淨租金報酬率(對現價):        %.2f%%" % (ann_net_rent / value * 100))   # 0.45%
+print("自有資金現金報酬率(cash-on-cash): %.2f%%" % (ann_net_rent / down * 100))  # 2.12%
+
+# ---- (B) 總報酬率（含增值）稅前 IRR ----
+end_equity = value - loan                          # 期末自有資金 = 1380
+annual_op = (rent - interest_exp - principal) / 5  # 每年淨流出 = -43.4
+cfs = [-down] + [annual_op] * 4 + [annual_op + end_equity]
+print("稅前 IRR = %.2f%%" % (irr(cfs) * 100))       # 17.37%
+
+# ---- (C) 稅後 / 賣出實現後 IRR（三情境）----
+# 賣出總成本 = 房地合一稅 + 仲介費 + 雜費
+for name, sell_cost in [("樂觀", 144), ("中性", 159), ("保守", 185)]:
+    end_after = end_equity - sell_cost
+    cfs_t = [-down] + [annual_op] * 4 + [annual_op + end_after]
+    print("稅後 IRR(%s, 成本%d萬) = %.2f%%" % (name, sell_cost, irr(cfs_t) * 100))
+    # 樂觀 14.45% / 中性 14.13% / 保守 13.57%</pre>
+</details>

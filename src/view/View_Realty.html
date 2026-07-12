@@ -1,0 +1,12 @@
+<script>
+// View（不動產報酬）：靜態分析報告頁。
+//   同 FIRE 報告——手寫內容、非帳本計算，不設 Model／ViewModel 層，也無 render/reload。
+//   報告 HTML 寫在 index.html 的 <section id="view-realty">，這裡只向核心註冊分頁，
+//   並用共用工具 App.View.bindReportExport 綁定「匯出 Markdown」（見 View_Report_Export）。
+(function () {
+  function wire() {
+    App.View.bindReportExport('realtyExportBtn', 'view-realty', '不動產投資報酬率分析.md');
+  }
+  App.View.registerPage({ name: 'realty', wire: wire });
+})();
+</script>

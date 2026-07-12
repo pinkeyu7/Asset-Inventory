@@ -2,126 +2,12 @@
 // View（FIRE 退休戰略）：靜態策略報告頁。
 //   內容為手寫策略論述（非帳本計算），故不設 Model／ViewModel 層，也無 render/reload——
 //   報告 HTML 已直接寫在 index.html 的 <section id="view-fire">，這裡只向核心註冊，
-//   讓分頁切換能連帶顯示/隱藏此頁（配色由 View_Styles 的 #view-fire 區塊處理）。
-//   另在 wire 綁定「匯出 Markdown」：直接把報告 DOM 轉成 Markdown 下載，
-//   內容不另存一份，報告改了匯出即同步。
+//   讓分頁切換能連帶顯示/隱藏此頁（配色由 View_Styles 的 .report 區塊處理）。
+//   匯出 Markdown 用共用工具 App.View.bindReportExport（見 View_Report_Export）。
 (function () {
-
-  // ---------- DOM → Markdown ----------
-  // 收斂連續空白/換行為單一空格（表格與行內文字用）
-  function clean(s) { return s.replace(/\s+/g, ' ').trim(); }
-
-  // 行內轉換：strong/b → **粗體**、br → 空白，其餘遞迴取文字
-  function inline(node) {
-    var out = '';
-    node.childNodes.forEach(function (n) {
-      if (n.nodeType === 3) { out += n.textContent; return; }        // 文字節點
-      if (n.nodeType !== 1) return;
-      var tag = n.tagName.toLowerCase();
-      if (tag === 'strong' || tag === 'b') out += '**' + clean(inline(n)) + '**';
-      else if (tag === 'br') out += ' ';
-      else out += inline(n);                                          // span 等：只取內容
-    });
-    return out;
-  }
-  function cell(el) { return clean(inline(el)).replace(/\|/g, '\\|'); }
-
-  function tableMd(table) {
-    var head = [].map.call(table.querySelectorAll('thead th'), cell);
-    if (!head.length) return '';
-    var lines = [
-      '| ' + head.join(' | ') + ' |',
-      '| ' + head.map(function () { return '---'; }).join(' | ') + ' |'
-    ];
-    [].forEach.call(table.querySelectorAll('tbody tr'), function (tr) {
-      lines.push('| ' + [].map.call(tr.children, cell).join(' | ') + ' |');
-    });
-    return lines.join('\n');
-  }
-
-  function listMd(list) {
-    return [].map.call(list.children, function (li) {
-      return '- ' + clean(inline(li));
-    }).join('\n');
-  }
-
-  var CALLOUT = ['note', 'alert-callout', 'callout', 'conclusion'];
-  var BLOCK_TAGS = ['p', 'ul', 'ol', 'table', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-  function hasClass(el, names) {
-    return names.some(function (c) { return el.classList.contains(c); });
-  }
-  // 是否含區塊級子元素；若無（僅文字/行內），整塊當一段行內文字處理，
-  // 避免像 .note／.bold 這種直接寫文字（未用 <p> 包）的容器漏字。
-  function hasBlockChild(el) {
-    return [].some.call(el.children, function (c) {
-      return BLOCK_TAGS.indexOf(c.tagName.toLowerCase()) >= 0;
-    });
-  }
-  // 容器 → 子區塊陣列：有區塊子元素就逐一轉，否則整塊視為單一行內段落
-  function childBlocks(el) {
-    return hasBlockChild(el) ? blocks(el) : [clean(inline(el))].filter(Boolean);
-  }
-
-  // 把一個元素轉成 Markdown 區塊字串（可能內含多個以空行分隔的子區塊）
-  function block(el) {
-    var tag = el.tagName.toLowerCase();
-    if (tag === 'h1') return '# ' + clean(inline(el));
-    if (tag === 'h2') return '## ' + clean(inline(el));
-    if (tag === 'h3') return '### ' + clean(inline(el));
-    if (tag === 'p') return clean(inline(el));
-    if (tag === 'ul' || tag === 'ol') return listMd(el);
-    if (tag === 'table') return tableMd(el);
-    if (tag === 'div') {
-      if (el.classList.contains('table-wrap')) {
-        var tb = el.querySelector('table');
-        return tb ? tableMd(tb) : '';
-      }
-      if (hasClass(el, CALLOUT)) {                                    // 提示框 → 引用區塊
-        return childBlocks(el).map(function (b) {
-          return b.split('\n').map(function (ln) { return '> ' + ln; }).join('\n');
-        }).join('\n>\n');
-      }
-      return childBlocks(el).join('\n\n');                            // header-banner／fire-closing／.bold 等
-    }
-    return clean(inline(el));                                         // 其餘元素：退回取文字
-  }
-
-  // 遍歷子元素轉為區塊陣列（略過標了 data-md-skip 的節點，例如工具列）
-  function blocks(parent) {
-    return [].filter.call(parent.children, function (el) {
-      return !el.hasAttribute('data-md-skip');
-    }).map(block).filter(function (s) { return s && s.trim(); });
-  }
-
-  function toMarkdown(root) {
-    return blocks(root).join('\n\n') + '\n';
-  }
-
-  // ---------- 下載 ----------
-  function download(filename, text) {
-    var blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  }
-
   function wire() {
-    var btn = document.getElementById('fireExportBtn');
-    var root = document.getElementById('view-fire');
-    if (!btn || !root) return;
-    btn.onclick = function () {
-      try {
-        download('FIRE-退休戰略報告.md', toMarkdown(root));
-      } catch (e) {
-        alert('匯出失敗：' + (e && e.message ? e.message : e));
-      }
-    };
+    App.View.bindReportExport('fireExportBtn', 'view-fire', 'FIRE-退休戰略報告.md');
   }
-
   App.View.registerPage({ name: 'fire', wire: wire });
 })();
 </script>

@@ -99,60 +99,67 @@
   .spin { display:inline-block; width:22px; height:22px; border:3px solid var(--border); border-top-color: var(--accent); border-radius:50%; animation: r 1s linear infinite; }
   @keyframes r { to { transform: rotate(360deg); } }
 
-  /* ---------- FIRE 退休戰略報告（靜態頁；固定配色對應主題變數，深/淺色皆可讀）---------- */
-  #view-fire { line-height: 1.65; --fire-gold: #c5a880; --fire-navy: #1a365d; --fire-warn: #c05621; --fire-info: #2b6cb0; }
+  /* ---------- 靜態報告共用樣式（FIRE 退休戰略、不動產報酬…；固定配色對應主題變數，深/淺色皆可讀）---------- */
+  .report { line-height: 1.65; --report-gold: #c5a880; --report-navy: #1a365d; --report-warn: #c05621; --report-info: #2b6cb0; }
   @media (prefers-color-scheme: dark) {
-    #view-fire { --fire-warn: #f0a868; --fire-info: #6fa8e6; }
+    .report { --report-warn: #f0a868; --report-info: #6fa8e6; }
   }
   /* 深藍金 hero／結語：兩種主題都維持識別色 */
-  #view-fire .header-banner { position: relative; background: var(--fire-navy); color: #fff; padding: 26px 28px; border-bottom: 5px solid var(--fire-gold); border-radius: 14px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  .report .header-banner { position: relative; background: var(--report-navy); color: #fff; padding: 26px 28px; border-bottom: 5px solid var(--report-gold); border-radius: 14px; margin-bottom: 22px; box-shadow: var(--shadow); }
   /* 匯出 Markdown：hero 右上角的低調金色描邊小按鈕 */
-  #view-fire .fire-export-btn { position: absolute; top: 20px; right: 20px; background: transparent; color: var(--fire-gold); border: 1px solid var(--fire-gold); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
-  #view-fire .fire-export-btn:hover { background: var(--fire-gold); color: var(--fire-navy); }
+  .report .report-export-btn { position: absolute; top: 20px; right: 20px; background: transparent; color: var(--report-gold); border: 1px solid var(--report-gold); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+  .report .report-export-btn:hover { background: var(--report-gold); color: var(--report-navy); }
   /* 窄螢幕：改為正常排列，避免壓到長標題 */
   @media (max-width: 640px) {
-    #view-fire .fire-export-btn { position: static; display: inline-block; margin-bottom: 14px; }
+    .report .report-export-btn { position: static; display: inline-block; margin-bottom: 14px; }
   }
-  #view-fire .header-banner h1 { font-size: 22px; margin: 0 0 12px; font-weight: 700; color: #fff; }
-  #view-fire .meta-info { font-size: 13px; color: #cbd5e0; margin: 4px 0; }
-  #view-fire .meta-info strong { color: #e2e8f0; }
-  #view-fire .verdict { margin-top: 14px; padding-top: 12px; border-top: 1px solid #2c5282; font-size: 15px; color: #f0fff4; font-weight: 700; }
-  #view-fire .fire-closing { background: var(--fire-navy); color: #e2e8f0; padding: 26px 28px; border-top: 5px solid var(--fire-gold); border-radius: 14px; margin: 22px 0 0; line-height: 1.85; }
-  #view-fire .fire-closing p { margin: 0 0 14px; }
-  #view-fire .fire-closing p.last { margin: 0; }
-  #view-fire .fire-closing strong.w { color: #fff; }
-  #view-fire .fire-closing strong.g { color: var(--fire-gold); }
-  #view-fire .fire-closing strong.big { font-size: 1.15em; }
+  .report .header-banner h1 { font-size: 22px; margin: 0 0 12px; font-weight: 700; color: #fff; }
+  .report .meta-info { font-size: 13px; color: #cbd5e0; margin: 4px 0; }
+  .report .meta-info strong { color: #e2e8f0; }
+  .report .verdict { margin-top: 14px; padding-top: 12px; border-top: 1px solid #2c5282; font-size: 15px; color: #f0fff4; font-weight: 700; }
+  .report .report-closing { background: var(--report-navy); color: #e2e8f0; padding: 26px 28px; border-top: 5px solid var(--report-gold); border-radius: 14px; margin: 22px 0 0; line-height: 1.85; }
+  .report .report-closing p { margin: 0 0 14px; }
+  .report .report-closing p.last { margin: 0; }
+  .report .report-closing strong.w { color: #fff; }
+  .report .report-closing strong.g { color: var(--report-gold); }
+  .report .report-closing strong.big { font-size: 1.15em; }
 
   /* 標題／內文 */
-  #view-fire h2 { font-size: 18px; color: var(--text); border-left: 5px solid var(--fire-gold); padding-left: 12px; margin: 34px 0 14px; }
-  #view-fire h3 { font-size: 15px; color: var(--accent); margin: 22px 0 10px; }
-  #view-fire p { margin: 12px 0; }
-  #view-fire ul { margin: 12px 0; padding-left: 22px; }
-  #view-fire li { margin: 6px 0; }
-  #view-fire .bold { font-weight: bold; }
-  #view-fire .text-center { text-align: center; }
-  #view-fire .neg { color: var(--liab); font-weight: bold; }
+  .report h2 { font-size: 18px; color: var(--text); border-left: 5px solid var(--report-gold); padding-left: 12px; margin: 34px 0 14px; }
+  .report h3 { font-size: 15px; color: var(--accent); margin: 22px 0 10px; }
+  .report p { margin: 12px 0; }
+  .report ul { margin: 12px 0; padding-left: 22px; }
+  .report li { margin: 6px 0; }
+  .report .bold { font-weight: bold; }
+  .report .text-center { text-align: center; }
+  .report .neg { color: var(--liab); font-weight: bold; }
+
+  /* 算式／程式碼：等寬字、保留換行、可橫向捲動 */
+  .report pre { background: rgba(127,127,127,.10); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 14px 0; overflow-x: auto; font-size: 12.5px; line-height: 1.55; }
+  .report code, .report pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .report pre.formula { color: var(--accent); }
+  .report details { margin: 14px 0; }
+  .report summary { cursor: pointer; font-weight: 600; color: var(--accent); }
 
   /* 表格：左對齊、實線框、深色表頭；語意色用 --net/--liab */
-  #view-fire .table-wrap { overflow-x: auto; }
-  #view-fire table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13px; }
-  #view-fire th, #view-fire td { padding: 10px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
-  #view-fire thead th { background: #2d3748; color: #fff; font-weight: 600; }
-  #view-fire tbody tr:nth-child(even) { background: rgba(127,127,127,.06); }
-  #view-fire .win-header { background: var(--net) !important; color: #fff !important; }
-  #view-fire .highlight-cell { background: rgba(23,166,115,.14) !important; font-weight: bold; border-color: var(--net); color: var(--net); }
-  #view-fire .total-row { background: rgba(127,127,127,.12) !important; font-weight: bold; }
+  .report .table-wrap { overflow-x: auto; }
+  .report table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13px; }
+  .report th, .report td { padding: 10px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .report thead th { background: #2d3748; color: #fff; font-weight: 600; }
+  .report tbody tr:nth-child(even) { background: rgba(127,127,127,.06); }
+  .report .win-header { background: var(--net) !important; color: #fff !important; }
+  .report .highlight-cell { background: rgba(23,166,115,.14) !important; font-weight: bold; border-color: var(--net); color: var(--net); }
+  .report .total-row { background: rgba(127,127,127,.12) !important; font-weight: bold; }
 
   /* 提示框：半透明底色疊在頁面上，深/淺皆自然 */
-  #view-fire .alert-callout, #view-fire .callout, #view-fire .conclusion, #view-fire .note {
+  .report .alert-callout, .report .callout, .report .conclusion, .report .note {
     padding: 14px 16px; margin: 18px 0; border-radius: 8px; border-left: 4px solid var(--muted);
   }
-  #view-fire .alert-callout { background: rgba(221,107,32,.10); border-left-color: var(--fire-warn); }
-  #view-fire .callout { background: rgba(49,130,206,.10); border-left-color: var(--fire-info); }
-  #view-fire .conclusion { background: rgba(23,166,115,.12); border-left-color: var(--net); }
-  #view-fire .note { background: rgba(127,127,127,.08); border-left-color: var(--muted); font-size: 13px; color: var(--muted); }
-  #view-fire .alert-callout > .bold { color: var(--fire-warn); margin-bottom: 4px; }
-  #view-fire .callout > .bold { color: var(--fire-info); margin-bottom: 4px; }
-  #view-fire .conclusion > .bold { color: var(--net); margin-bottom: 4px; }
+  .report .alert-callout { background: rgba(221,107,32,.10); border-left-color: var(--report-warn); }
+  .report .callout { background: rgba(49,130,206,.10); border-left-color: var(--report-info); }
+  .report .conclusion { background: rgba(23,166,115,.12); border-left-color: var(--net); }
+  .report .note { background: rgba(127,127,127,.08); border-left-color: var(--muted); font-size: 13px; color: var(--muted); }
+  .report .alert-callout > .bold { color: var(--report-warn); margin-bottom: 4px; }
+  .report .callout > .bold { color: var(--report-info); margin-bottom: 4px; }
+  .report .conclusion > .bold { color: var(--net); margin-bottom: 4px; }
 </style>
