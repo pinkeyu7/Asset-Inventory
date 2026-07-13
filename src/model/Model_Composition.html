@@ -10,7 +10,14 @@
     return Object.keys(s).sort(function (a, b) { return maxOf(s[b]) - maxOf(s[a]); });
   };
 
-  // 某月各資產帳戶 → {month, items:[{full,short,value}], total}
+  // 各年份 → 該年最後一個月的索引（年底快照；當年若未滿則取最新月）
+  M.compositionYears = function () {
+    var months = M.data().months || [], map = {};
+    months.forEach(function (m, i) { map[m.split('-')[0]] = i; });   // 同年後面的月會覆寫，留下年末索引
+    return Object.keys(map).sort().map(function (y) { return { year: y, idx: map[y] }; });
+  };
+
+  // 某月底各資產帳戶 → {year, items:[{full,short,value}], total}
   M.composition = function (idx) {
     var D = M.data(), items = [];
     Object.keys(D.assetSeries).forEach(function (acc) {
@@ -20,7 +27,7 @@
     items.sort(function (a, b) { return b.value - a.value; });
     var total = items.reduce(function (s, it) { return s + it.value; }, 0);
     items.forEach(function (it) { it.pct = total ? it.value / total * 100 : 0; });
-    return { month: D.months[idx], items: items, total: total };
+    return { year: (D.months[idx] || '').split('-')[0], items: items, total: total };
   };
 })();
 </script>

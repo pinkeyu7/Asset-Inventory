@@ -76,19 +76,11 @@
   .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
   .controls label { font-size: 13px; color: var(--muted); }
   input[type=range] { flex: 1; min-width: 180px; accent-color: var(--accent); }
-  .month-badge { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 66px; }
+  .year-badge { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 66px; }
   select {
     background: var(--bg); color: var(--text); border: 1px solid var(--border);
     border-radius: 8px; padding: 6px 8px; font-size: 13px; font-variant-numeric: tabular-nums;
   }
-  .presets { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
-  .preset, .gran {
-    border: 1px solid var(--border); background: var(--card); color: var(--muted);
-    padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600;
-  }
-  .preset:hover, .gran:hover { color: var(--text); border-color: var(--accent); }
-  .preset.active, .gran.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .seg { display: inline-flex; gap: 4px; padding-right: 6px; border-right: 1px solid var(--border); margin-right: 4px; }
 
   .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 8px; }
   .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }

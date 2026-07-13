@@ -62,20 +62,10 @@
         <div class="kpis" id="kpis"></div>
         <div class="card">
           <h2>資產 / 負債 / 淨值 走勢</h2>
-          <p class="hint">顯示各期期末（月底／年底）的累積餘額</p>
+          <p class="hint">顯示各年底的累積餘額</p>
           <div class="controls">
-            <span class="seg">
-              <button class="gran active" data-gran="month">月</button>
-              <button class="gran" data-gran="year">年</button>
-            </span>
             <label>起</label><select id="trendStart"></select>
             <label>迄</label><select id="trendEnd"></select>
-            <span class="presets">
-              <button class="preset" data-months="12">近1年</button>
-              <button class="preset" data-months="36">近3年</button>
-              <button class="preset" data-months="60">近5年</button>
-              <button class="preset" data-months="0">全部</button>
-            </span>
           </div>
           <div id="trendChart" class="chart tall"></div>
           <div class="legend">
@@ -88,16 +78,16 @@
       <section id="view-composition" class="hidden">
         <div class="card">
           <h2>資產組成佔比</h2>
-          <p class="hint">拖動時間軸查看任一月份的各資產帳戶分布</p>
+          <p class="hint">拖動時間軸查看任一年底的各資產帳戶分布</p>
           <div class="controls">
-            <label>月份</label>
-            <input type="range" id="monthSlider" min="0" value="0">
-            <span class="month-badge" id="monthLabel"></span>
+            <label>年份</label>
+            <input type="range" id="yearSlider" min="0" value="0">
+            <span class="year-badge" id="yearLabel"></span>
           </div>
           <div id="compChart" class="chart"></div>
         </div>
         <div class="card">
-          <h2>該月各資產明細</h2>
+          <h2>該年各資產明細</h2>
           <div id="compTable"></div>
         </div>
       </section>

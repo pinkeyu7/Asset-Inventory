@@ -54,31 +54,20 @@
     new google.visualization.ComboChart(V.$('trendChart')).draw(dt, o);
   }
 
-  function populateRangeOptions(gran) {
-    var opts = (gran === 'year')
-      ? M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('')
-      : M.months().map(function (m, i) { return '<option value="' + i + '">' + m + '</option>'; }).join('');
+  function populateRangeOptions() {
+    var opts = M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
     V.$('trendStart').innerHTML = opts;
     V.$('trendEnd').innerHTML = opts;
   }
   function syncRangeControls(r) {
     V.$('trendStart').value = r.start;
     V.$('trendEnd').value = r.end;
-    document.querySelectorAll('.preset').forEach(function (b) {
-      b.classList.toggle('active', parseInt(b.dataset.months, 10) === r.presetMonths);
-    });
   }
 
   function render() { renderKPIs(); renderTrend(); }
-  function beforeInit() { populateRangeOptions(VM.trend().granularity); }
+  function beforeInit() { populateRangeOptions(); }
 
   function wire() {
-    document.querySelectorAll('.gran').forEach(function (btn) {
-      btn.onclick = function () { VM.setGranularity(btn.dataset.gran); };
-    });
-    document.querySelectorAll('.preset').forEach(function (btn) {
-      btn.onclick = function () { VM.applyPreset(parseInt(btn.dataset.months, 10)); };
-    });
     var startSel = V.$('trendStart'), endSel = V.$('trendEnd');
     startSel.onchange = function () {
       var s = startSel.value, e = endSel.value;
@@ -90,10 +79,6 @@
       if (parseInt(e, 10) < parseInt(s, 10)) s = e;
       VM.setRange(s, e);
     };
-    VM.on('granularityChanged', function (g) {
-      document.querySelectorAll('.gran').forEach(function (b) { b.classList.toggle('active', b.dataset.gran === g); });
-      populateRangeOptions(g);
-    });
     VM.on('rangeChanged', function (r) { syncRangeControls(r); });
     VM.on('trendChanged', function () { if (VM.activeView() === 'trend') renderTrend(); });
   }

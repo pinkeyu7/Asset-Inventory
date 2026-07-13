@@ -1,5 +1,5 @@
 <script>
-// View（資產組成）：環圈圖 + 明細，依帳戶固定配色，月份滑桿
+// View（資產組成）：環圈圖 + 明細，依帳戶固定配色，年份滑桿
 (function () {
   var V = App.View, VM = App.ViewModel, M = App.Model;
 
@@ -10,10 +10,10 @@
     if (!V.chartsReady()) return;
     colors.ensure(M.assetAccounts());
     var c = VM.compositionData();
-    V.$('monthLabel').textContent = c.month;
+    V.$('yearLabel').textContent = c.year;
     var o = V.donutOptions();
     o.colors = c.items.map(function (it) { return colors.of(it.full); });
-    if (!c.items.length) { V.$('compChart').innerHTML = '<p class="hint">該月無資產餘額</p>'; }
+    if (!c.items.length) { V.$('compChart').innerHTML = '<p class="hint">該年無資產餘額</p>'; }
     else {
       var rows = [['帳戶', '金額']];
       c.items.forEach(function (it) { rows.push([it.short, it.value]); });
@@ -24,13 +24,18 @@
 
   function reload() {
     colors.reset();                        // 重建配色（上傳新資料後帳戶可能改變）
-    var slider = V.$('monthSlider');
-    slider.max = M.monthCount() - 1;
-    slider.value = M.monthCount() - 1;
+    var years = M.compositionYears();
+    var slider = V.$('yearSlider');
+    slider.max = years.length - 1;
+    slider.value = years.length - 1;       // 預設最新年份
   }
 
   function wire() {
-    V.$('monthSlider').oninput = function () { VM.setCompositionMonth(parseInt(this.value, 10) || 0); };
+    V.$('yearSlider').oninput = function () {
+      var years = M.compositionYears(), pos = parseInt(this.value, 10) || 0;
+      var y = years[pos] || years[years.length - 1];
+      VM.setCompositionMonth(y ? y.idx : 0);
+    };
     VM.on('compositionChanged', function () { render(); });
   }
 

@@ -1,40 +1,13 @@
 <script>
-// ViewModel（淨值趨勢）：顆粒度、起迄區間、快捷
+// ViewModel（淨值趨勢）：顆粒度、起迄區間
 (function () {
   var VM = App.ViewModel, M = App.Model;
-  VM.state.trend = { granularity: 'month', presetMonths: 36, start: null, end: null };
-
-  VM.setGranularity = function (g) {
-    if (VM.state.trend.granularity === g) return;
-    VM.state.trend.granularity = g;
-    VM.emit('granularityChanged', g);
-    VM.applyPreset(VM.state.trend.presetMonths || 36);
-  };
-
-  VM.applyPreset = function (months) {
-    var st = VM.state.trend;
-    st.presetMonths = months;
-    if (st.granularity === 'year') {
-      var ys = M.distinctYears();
-      if (months === 0) { st.start = ys[0]; st.end = ys[ys.length - 1]; }
-      else {
-        var ny = M.nowYear(), back = Math.round(months / 12);
-        st.end = String(ny);
-        st.start = String(Math.max(parseInt(ys[0], 10), ny - (back - 1)));
-      }
-    } else {
-      var n = M.monthCount();
-      if (months === 0) { st.start = 0; st.end = n - 1; }
-      else { var ni = M.nowIndex(); st.end = ni; st.start = Math.max(0, ni - months); }
-    }
-    VM.emit('rangeChanged', { start: st.start, end: st.end, presetMonths: months });
-    VM.emit('trendChanged');
-  };
+  VM.state.trend = { granularity: 'year', start: null, end: null };
 
   VM.setRange = function (start, end) {
     var st = VM.state.trend;
-    st.start = start; st.end = end; st.presetMonths = null;
-    VM.emit('rangeChanged', { start: start, end: end, presetMonths: null });
+    st.start = start; st.end = end;
+    VM.emit('rangeChanged', { start: start, end: end });
     VM.emit('trendChanged');
   };
 
@@ -42,6 +15,9 @@
   VM.trendData = function () { return M.trendSeries(VM.state.trend.granularity, VM.state.trend.start, VM.state.trend.end); };
   VM.kpis = function () { return M.kpis(); };
 
-  VM.registerInit(function () { VM.applyPreset(36); });   // 預設近3年（月顆粒度）
+  VM.registerInit(function () {           // 預設顯示全部年度
+    var ys = M.distinctYears();
+    VM.setRange(ys[0], ys[ys.length - 1]);
+  });
 })();
 </script>
