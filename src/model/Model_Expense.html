@@ -1,0 +1,48 @@
+<script>
+// Model（支出結構）：支出帳戶固定順序、單期佔比、年度比較
+(function () {
+  var M = App.Model;
+
+  // 全期出現過的支出帳戶，依「全期總額」由大到小排序（供固定配色用，與所選年份無關）
+  M.expenseAccounts = function () {
+    var map = M.data().expenseByYear || {}, agg = {};
+    Object.keys(map).forEach(function (y) {
+      var a = map[y];
+      Object.keys(a).forEach(function (k) { agg[k] = (agg[k] || 0) + a[k]; });
+    });
+    return Object.keys(agg).sort(function (a, b) { return agg[b] - agg[a]; });
+  };
+
+  // 某年（或 'ALL' 全部）各支出帳戶 → {items:[{full,short,value}], total}
+  M.expenseBreakdown = function (year) {
+    var map = M.data().expenseByYear || {}, agg = {};
+    Object.keys(map).forEach(function (y) {
+      if (year === 'ALL' || y === String(year)) {
+        var accs = map[y];
+        Object.keys(accs).forEach(function (a) { agg[a] = (agg[a] || 0) + accs[a]; });
+      }
+    });
+    var items = Object.keys(agg).map(function (a) { return { full: a, short: M.shortName(a), value: agg[a] }; })
+      .filter(function (it) { return it.value > 0.5; })
+      .sort(function (a, b) { return b.value - a.value; });
+    var total = items.reduce(function (s, it) { return s + it.value; }, 0);
+    items.forEach(function (it) { it.pct = total ? it.value / total * 100 : 0; });
+    return { items: items, total: total };
+  };
+
+  // 年度比較：{years:[...], accounts:[{full,short}...(固定順序)], rows:[[各項目金額]...對齊 years]}
+  M.expenseTrend = function () {
+    var map = M.data().expenseByYear || {};
+    var years = Object.keys(map).sort();
+    var accs = M.expenseAccounts();
+    return {
+      years: years,
+      accounts: accs.map(function (a) { return { full: a, short: M.shortName(a) }; }),
+      rows: years.map(function (y) {
+        var o = map[y] || {};
+        return accs.map(function (a) { return Math.round(o[a] || 0); });
+      })
+    };
+  };
+})();
+</script>

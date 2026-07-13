@@ -1,0 +1,17 @@
+<script>
+// ViewModel（支出結構）：所選年份（含 'ALL' 全部）
+(function () {
+  var VM = App.ViewModel, M = App.Model;
+  VM.state.expense = { year: 'ALL' };
+
+  VM.setExpenseYear = function (year) {
+    VM.state.expense.year = String(year);
+    VM.emit('expenseChanged', VM.state.expense.year);
+  };
+  VM.expenseYear = function () { return VM.state.expense.year; };
+  VM.expenseData = function () { return M.expenseBreakdown(VM.state.expense.year); };
+  VM.expenseTrendData = function () { return M.expenseTrend(); };
+
+  VM.registerInit(function () { VM.state.expense.year = 'ALL'; });
+})();
+</script>

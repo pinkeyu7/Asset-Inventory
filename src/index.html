@@ -46,6 +46,7 @@
         <button class="tab" data-view="monthly">📅 月度收支</button>
         <button class="tab" data-view="yearly">📊 年度收支</button>
         <button class="tab" data-view="income">💰 收入來源</button>
+        <button class="tab" data-view="expense">💸 支出結構</button>
         <!-- 報告：3 份靜態分析收進下拉，主排只留常看的即時儀表板 -->
         <div class="tab-menu" id="reportMenu">
           <button class="tab tab-trigger" id="reportMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="reportMenuPanel">📄 報告 <span class="caret">▾</span></button>
@@ -142,6 +143,27 @@
         </div>
       </section>
 
+      <!-- 支出結構 -->
+      <section id="view-expense" class="hidden">
+        <div class="card">
+          <h2>支出結構佔比</h2>
+          <p class="hint">選擇年份（或全部），檢視各支出項目的金額與佔比</p>
+          <div class="controls">
+            <label>年份</label><select id="expenseYear"></select>
+          </div>
+          <div id="expenseChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h2>各項目明細</h2>
+          <div id="expenseTable"></div>
+        </div>
+        <div class="card">
+          <h2>各項目年度比較</h2>
+          <p class="hint">各支出項目歷年金額（堆疊，總高度＝當年總支出；與所選年份無關）</p>
+          <div id="expenseTrendChart" class="chart tall"></div>
+        </div>
+      </section>
+
       <!-- 不動產報酬（靜態報告，樣式共用 .report） -->
       <section id="view-realty" class="report hidden">
         <?!= include('view/View_Realty_Report') ?>
@@ -170,6 +192,7 @@
   <?!= include('model/Model_Monthly') ?>
   <?!= include('model/Model_Yearly') ?>
   <?!= include('model/Model_Income') ?>
+  <?!= include('model/Model_Expense') ?>
   <?!= include('model/Importer') ?>
 
   <!-- ViewModel 層 -->
@@ -179,6 +202,7 @@
   <?!= include('viewmodel/ViewModel_Monthly') ?>
   <?!= include('viewmodel/ViewModel_Yearly') ?>
   <?!= include('viewmodel/ViewModel_Income') ?>
+  <?!= include('viewmodel/ViewModel_Expense') ?>
 
   <!-- View 層 -->
   <?!= include('view/Core_View') ?>
@@ -187,6 +211,7 @@
   <?!= include('view/View_Monthly') ?>
   <?!= include('view/View_Yearly') ?>
   <?!= include('view/View_Income') ?>
+  <?!= include('view/View_Expense') ?>
   <?!= include('view/View_Report_Export') ?>
   <?!= include('view/View_Realty') ?>
   <?!= include('view/View_CTiming') ?>

@@ -1,0 +1,57 @@
+<script>
+// View（支出結構）：環圈圖 + 明細 + 年度比較堆疊圖，依帳戶固定配色
+(function () {
+  var V = App.View, VM = App.ViewModel, M = App.Model;
+
+  // 支出類別多達 14 項，備足 14 色以免環圈圖相鄰色重複（暖色系起頭，呼應「支出」）
+  var EXPENSE_PALETTE = ['#e0533d', '#f5a623', '#d94f9a', '#8a5cf6', '#2f6df6', '#12a4b8', '#17a673',
+                         '#6b7280', '#c98a2b', '#3fb27f', '#7048e8', '#e8590c', '#0ca678', '#f06595'];
+  var colors = V.makeColorMap(EXPENSE_PALETTE);
+
+  function render() {
+    if (!V.chartsReady()) return;
+    colors.ensure(M.expenseAccounts());
+    var c = VM.expenseData();
+    var o = V.donutOptions();
+    o.colors = c.items.map(function (it) { return colors.of(it.full); });
+    if (!c.items.length) { V.$('expenseChart').innerHTML = '<p class="hint">該期間無支出</p>'; }
+    else {
+      var rows = [['項目', '金額']];
+      c.items.forEach(function (it) { rows.push([it.short, it.value]); });
+      new google.visualization.PieChart(V.$('expenseChart')).draw(google.visualization.arrayToDataTable(rows), o);
+    }
+    V.$('expenseTable').innerHTML = V.breakdownTableHtml('支出項目', c.items, c.total);
+    renderTrend();
+  }
+
+  function renderTrend() {
+    if (!V.chartsReady()) return;
+    colors.ensure(M.expenseAccounts());
+    var t = VM.expenseTrendData();
+    if (!t.years.length || !t.accounts.length) { V.$('expenseTrendChart').innerHTML = ''; return; }
+    var rows = [['年度'].concat(t.accounts.map(function (a) { return a.short; }))];
+    t.years.forEach(function (y, i) { rows.push([y].concat(t.rows[i])); });
+    var o = V.baseOptions();
+    o.isStacked = true;
+    o.bar = { groupWidth: '70%' };
+    o.legend = { position: 'top', maxLines: 3, textStyle: { color: V.cssVar('--text'), fontSize: 11 } };
+    o.colors = t.accounts.map(function (a) { return colors.of(a.full); });
+    o.hAxis.showTextEvery = 1;
+    new google.visualization.ColumnChart(V.$('expenseTrendChart')).draw(google.visualization.arrayToDataTable(rows), o);
+  }
+
+  function populateYears() {
+    colors.reset();                        // 重建配色（上傳新資料後帳戶可能改變）
+    V.$('expenseYear').innerHTML = '<option value="ALL">全部</option>' +
+      M.distinctYears().map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+    V.$('expenseYear').value = VM.expenseYear();
+  }
+  function reload() { populateYears(); }
+  function wire() {
+    V.$('expenseYear').onchange = function () { VM.setExpenseYear(this.value); };
+    VM.on('expenseChanged', function () { render(); });
+  }
+
+  V.registerPage({ name: 'expense', render: render, wire: wire, reload: reload });
+})();
+</script>
