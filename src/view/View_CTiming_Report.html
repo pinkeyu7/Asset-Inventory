@@ -1,0 +1,163 @@
+<!-- C 房賣出時機分析報告（靜態內容）：由 index.html 的 <section id="view-ctiming"> 以 include 組入。
+     手寫分析、非帳本計算；配色樣式共用 View_Styles 的 .report 區塊。
+     與 FIRE 報告的 C 房參數一致（市值 2,100／取得 1,812／貸款 1,087／月付 4.5 萬）。
+     核心視角：房貸「利息」才是持有的真實成本，本金屬強迫儲蓄、賣出時會拿回。 -->
+<div class="header-banner">
+  <!-- 匯出 Markdown：與其他報告共用 App.View.bindReportExport；data-md-skip 使其不納入轉換。 -->
+  <button id="cTimingExportBtn" class="report-export-btn" type="button" data-md-skip>⬇️ 匯出 Markdown</button>
+  <h1>⏳ C 房屋・賣出時機影響分析</h1>
+  <p class="meta-info"><strong>標的：</strong> C 房屋（預售屋交屋後，非自住、預計出脫）</p>
+  <p class="meta-info"><strong>決策問題：</strong> 為了省房地合一稅而「晚點賣」，扛得住每月房貸利息嗎？</p>
+  <p class="meta-info"><strong>分析基準日：</strong> 2026-07（C 房交屋前後）</p>
+  <p class="verdict">結論：交屋後<strong>儘速賣出</strong>——為省稅多扛的房貸<strong>利息</strong>，遠大於省下的稅</p>
+</div>
+
+<h2>🎯 一、問題背景與 C 房基本資料</h2>
+<p>C 房因女友不擬入住、已無自住價值，確定要出脫。唯一的變數是<strong>「賣出時機」</strong>：房地合一稅率會隨持有期拉長而下降（45% → 20% → 15%），直覺上「多等幾年、少繳點稅」似乎划算。但每多持有一個月，就多繳一個月房貸——<strong>其中的利息是拿不回來的真實成本</strong>。本報告就用這筆利息帳來檢驗。</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>項目</th><th>金額（萬）</th><th>備註</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>目前市值</td><td>2,100</td><td>交屋當下</td></tr>
+    <tr><td>取得成本</td><td>1,812</td><td>房地合一課稅基礎</td></tr>
+    <tr><td class="bold">帳面增值</td><td class="bold">288</td><td>2,100 − 1,812</td></tr>
+    <tr><td>貸款餘額</td><td>1,087</td><td>剛交屋</td></tr>
+    <tr><td>房貸月付</td><td>4.5（＝45,000 元）</td><td>30 年、年利率約 2.86%（無寬限期）</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>⚖️ 二、核心試算：省稅 vs 燒利息</h2>
+<p>拉長持有期能降房地合一稅率（省稅），但每多持有一個月就多繳一個月房貸利息。把兩者對撞就見真章——<strong>全程只用稅額與利息、不需任何投資報酬假設</strong>。</p>
+
+<h3>1. 稅率隨持有期遞減（省稅的天花板）</h3>
+<p>個人非自住房地，稅率依<strong>持有期間</strong>（自交屋取得所有權起算）分級。就本案 288 萬增值估算：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>持有期間（成屋）</th><th>稅率</th><th>估算稅額</th><th>相對「交屋即賣」省稅</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>2 年以內</td><td class="neg">45%</td><td>約 108 萬</td><td>—</td></tr>
+    <tr><td>超過 2 年～5 年</td><td>35%</td><td>約 97 萬</td><td>+11 萬</td></tr>
+    <tr><td>超過 5 年～10 年</td><td>20%</td><td>約 67 萬</td><td>+41 萬</td></tr>
+    <tr><td>超過 10 年</td><td>15%</td><td>約 65 萬</td><td>+43 萬</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">📎 <strong>省稅的天花板很低：</strong> 就算從 45% 一路等到 20%，也只省約 <strong>41 萬</strong>；等到 15% 也才 43 萬。這就是「多持有」能換到的全部好處——接下來看它的代價。（另有「自住滿 6 年」可享免稅額 400 萬＋10% 的特例，見第四節。）</div>
+
+<h3>2. 每月房貸拆解：利息是成本，本金會拿回</h3>
+<p>4.5 萬的月付裡，一部分是<strong>利息</strong>（付給銀行、拿不回來），一部分是<strong>本金</strong>（還自己的債，賣出時透過「較低貸餘 → 較高淨入袋」原封拿回）。所以衡量「持有成本」時，<strong>只有利息算數</strong>。而房貸前期利息最重：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>持有期間</th><th>累計利息（真實成本・燒掉）</th><th>累計本金（賣時拿回）</th><th>期末貸款餘額</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>持有 2 年</td><td class="neg">61 萬</td><td>47 萬</td><td>1,040 萬</td></tr>
+    <tr><td>持有 5 年</td><td class="neg">147 萬</td><td>123 萬</td><td>964 萬</td></tr>
+    <tr><td>持有 10 年</td><td class="neg">275 萬</td><td>265 萬</td><td>822 萬</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">前幾年利息約占月付一半以上：<strong>第 1 年利息 30.8 萬（月均約 2.57 萬）</strong>、本金僅 23.2 萬。也就是說，交屋後空置持有的頭幾年，每月大約有 <strong>2.5 萬是純粹丟進水裡</strong>。</div>
+
+<h3>3. 純現金帳：為省稅而多持有，反而虧</h3>
+<p>把「省下的稅」和「多燒的利息」直接對撞——<strong>這一節完全不用任何報酬率假設，只有利息 vs 稅</strong>：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>相對「交屋即賣」多持有</th><th>省下的稅</th><th>多燒的利息</th><th>淨結果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>多持有 2 年</td><td>+11 萬</td><td class="neg">−61 萬</td><td class="neg bold">−50 萬</td></tr>
+    <tr><td>多持有 5 年</td><td>+41 萬</td><td class="neg">−147 萬</td><td class="neg bold">−106 萬</td></tr>
+    <tr><td>自住滿 6 年（免稅）</td><td>+108 萬（全免）</td><td class="neg">−174 萬</td><td class="neg bold">−66 萬</td></tr>
+    <tr><td>多持有 10 年</td><td>+43 萬</td><td class="neg">−275 萬</td><td class="neg bold">−232 萬</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="conclusion">
+  <div class="bold">✅ 光看利息就結案</div>
+  <p>每晚賣一年，房貸利息燒掉的錢就遠超過稅率階梯能省的。等到滿 5 年把稅降到 20%，帳面已經先淨虧約 <strong>106 萬</strong>——而且這還沒算賣款晚回填 B 貸、B 利息繼續累積的損失（見第三節）。<strong>省稅是省小錢，扛利息是花大錢。</strong></p>
+</div>
+
+<h2>🔁 三、賣出款的去向：回填 B 房貸</h2>
+<p>在整體規劃（FIRE 方案三）裡，賣掉 C 的淨入袋<strong>不是拿去投資 0050，而是回填 B 屋房貸</strong>。因此「投入 0050 賺 8%」這類報酬假設在本案並不成立，本報告不採用；早賣的真正效益，一樣要回到「利息」上看。</p>
+<div class="callout">
+  <div class="bold">🔑 早賣 C = 同時關掉兩個利息水龍頭</div>
+  <p>拖著不賣 C，你會<strong>雙重付息</strong>：一邊繼續繳 C 的房貸利息（前期每月約 2.5 萬），一邊因為賣款還沒回填 B 貸、<strong>B 的利息也持續累積</strong>（B 貸 870 萬 @ 年利率 2.52%，每月利息約 <strong>1.8 萬</strong>）。早點賣 C、把錢回填 B，等於一次關掉兩個利息水龍頭——C 約 2.5 萬 ＋ B 約 1.8 萬，<strong>合計每月約 4.3 萬利息</strong>止血；這個效益<strong>不需要任何投資報酬假設</strong>就成立。</p>
+</div>
+
+<h2>🏠 四、特例：自住滿 6 年的免稅優惠</h2>
+<p>《所得稅法》自用住宅優惠：<strong>本人（或配偶、未成年子女）設籍並實際居住連續滿 6 年、期間未出租或營業、且 6 年內未曾使用過本優惠</strong>，課稅所得 400 萬以內<strong>免稅</strong>、超過部分僅 10%。</p>
+<p>C 房增值扣費用後課稅所得約 <strong>354 萬 &lt; 400 萬</strong> → <strong>完全免稅</strong>。淨入袋衝到約 <strong>1,228 萬</strong>（全表最高），比同期非自住（20% 稅）省約 71 萬、比交屋即賣（45%）省約 108 萬稅。</p>
+<div class="callout">
+  <div class="bold">但「免稅」仍然贏不了「早賣」——兩個理由</div>
+  <ul>
+    <li><strong>利息全自己扛：</strong> 自住就是自己住、自己繳貸，那 6 年約 <strong>174 萬利息</strong>全由自己承擔。就算稅全免（省 108 萬），純現金仍淨虧約 <strong>66 萬</strong>（見第二節）。</li>
+    <li><strong>延後回填 B 貸：</strong> 自住 6 年＝賣款 6 年後才到手，B 房貸也就晚 6 年才被回填、<strong>多繳 6 年 B 的利息</strong>（見第三節）。</li>
+  </ul>
+</div>
+<div class="alert-callout">
+  <div class="bold">⚠️ 而且這一格與現實直接矛盾</div>
+  <p>要拿這免稅，得<strong>你本人搬進 C、設籍、住滿 6 年、且不出租</strong>。但 C 的問題正是<strong>女友不擬入住</strong>；為了省一筆比利息還小的稅而去住 C 六年，<strong>財務與人生兩面都不划算</strong>——除非哪天你們真的決定把 C 當自住家，那才是另一個故事。</p>
+</div>
+
+<h2>🚦 五、結論與行動建議</h2>
+<ul>
+  <li><strong>時機：</strong> 交屋後即以合理價掛售，不為稅率階梯拖延。<strong>速度 &gt; 稅率</strong>——每拖一年，利息燒掉的都比省下的稅多。</li>
+  <li><strong>不追高價：</strong> 以合理價快速成交，別為多賣一點而拖著——空置等買方期間，每月仍在燒約 2.5 萬利息。</li>
+  <li><strong>稅務：</strong> 交屋前先請地政士確認持有期起算、土地漲價總數額與可列舉費用，把 45% 的實際稅額壓低（本表未計土增可扣抵，實際稅額可能更低，更強化「早賣」結論）。</li>
+  <li><strong>自住免稅也救不回：</strong> 即使符合自住滿 6 年免稅，仍因自扛 6 年利息（約 174 萬、純現金淨虧 66 萬）＋延後回填 B 貸而不划算（見第四節）——除非本來就打算把 C 當長期自住家。</li>
+</ul>
+<div class="alert-callout">
+  <div class="bold">⚠️ 這是「純財務」視角，人生變數可以推翻它</div>
+  <p>以上假設 C 一定會賣。若與女友的居住規劃尚未明朗、C 仍有「可能自住／保留彈性」的價值，那份<strong>選擇權</strong>不在本模型內。財務上早賣最優；但「不可逆的賣出 vs 保留彈性」屬人生決策，應優先於這張表——詳見 FIRE 規劃報告的整體取捨。</p>
+</div>
+
+<h2>📌 六、假設與注意事項</h2>
+<ol>
+  <li><strong>利息拆解：</strong> 依 1,087 萬、月付 45,000、年利率 2.86%、30 年本息攤還（無寬限期）逐月拆分本息，為本報告最不依賴假設的核心。</li>
+  <li><strong>本金非成本：</strong> 已還本金會在賣出時透過較低貸餘、較高淨入袋原封拿回，故持有成本只計利息。</li>
+  <li><strong>房地合一稅：</strong> 以增值扣仲介、雜費後乘稅率估算，未計土地漲價總數額可扣抵（故為保守上限）；持有期起算依成屋登記，實際認定請洽專業人士。</li>
+  <li><strong>自住優惠要件：</strong> 本人（或配偶、未成年子女）設籍並實際居住連續滿 6 年、期間未出租或營業、6 年內未用過本優惠；本案課稅所得約 354 萬 &lt; 400 萬免稅額故全免。要件嚴格且與「非自住、女友不住」的前提衝突，僅供對照。</li>
+  <li><strong>不採用股市報酬假設：</strong> 因賣款用於回填 B 房貸而非投資，本報告刻意不以 0050／8% 等報酬估算，結論僅建立在利息與稅額上。</li>
+  <li>本報告數字單位皆為「萬（新台幣）」。</li>
+</ol>
+
+<h2>🧾 附錄：驗算程式（Python）</h2>
+<details>
+  <summary>展開驗算程式碼</summary>
+<pre>W = 10000
+loan0, rm, pay = 1087*W, 0.0286/12, 45000     # 貸款 / 月利率 / 月付
+
+def amort(months):                            # 逐月拆本息
+    b, ci, cp = loan0, 0, 0
+    for _ in range(months):
+        i = b*rm; p = pay - i                 # 當月利息 / 本金
+        ci += i; cp += p; b -= p
+    return ci, cp, b                          # 累計利息, 累計本金, 期末餘額
+
+tax = {0:108, 2:97, 5:67, 10:65}              # 房地合一稅(萬)
+for T in [2, 5, 10]:
+    ci, cp, b = amort(T*12)
+    saved = tax[0] - tax[T]                   # 省下的稅
+    print("多持有%2d年: 省稅%+d萬, 燒利息-%.0f萬 -> 淨 %.0f萬"
+          % (T, saved, ci/W, saved - ci/W))
+# 多持有 2年: 省稅+11萬, 燒利息-61萬  -> 淨  -50萬
+# 多持有 5年: 省稅+41萬, 燒利息-147萬 -> 淨 -106萬
+# 多持有10年: 省稅+43萬, 燒利息-275萬 -> 淨 -232萬
+
+# ---- 特例：自住滿6年（免稅額400萬、超過10%）----
+mkt6 = 2100*W * (1.009**6)                    # 6年後市值
+ci6, cp6, b6 = amort(72)
+taxable6 = (mkt6 - 1812*W) - mkt6*0.02 - 6*W  # 課稅所得(扣費)
+tax_self = max(0, taxable6 - 400*W) * 0.10    # 自住優惠
+print("自住6年: 課稅所得%.0f萬(<400免稅) 稅%.0f萬 淨入袋%.0f萬 但自扛利息%.0f萬"
+      % (taxable6/W, tax_self/W, (mkt6-b6-mkt6*0.02-6*W-tax_self)/W, ci6/W))
+# 自住6年: 課稅所得354萬(<400免稅) 稅0萬 淨入袋1228萬 但自扛利息174萬</pre>
+</details>

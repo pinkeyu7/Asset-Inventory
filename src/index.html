@@ -47,6 +47,7 @@
         <button class="tab" data-view="yearly">📊 年度收支</button>
         <button class="tab" data-view="income">💰 收入來源</button>
         <button class="tab" data-view="realty">🏘️ 房產報酬</button>
+        <button class="tab" data-view="ctiming">⏳ C房賣點</button>
         <button class="tab" data-view="fire">🏡 FIRE 規劃</button>
       </div>
 
@@ -150,6 +151,11 @@
         <?!= include('view/View_Realty_Report') ?>
       </section>
 
+      <!-- C 房賣出時機（靜態報告，樣式共用 .report） -->
+      <section id="view-ctiming" class="report hidden">
+        <?!= include('view/View_CTiming_Report') ?>
+      </section>
+
       <!-- FIRE 退休戰略（靜態報告，配色吃深/淺主題） -->
       <section id="view-fire" class="report hidden">
         <?!= include('view/View_Fire_Report') ?>
@@ -187,6 +193,7 @@
   <?!= include('view/View_Income') ?>
   <?!= include('view/View_Report_Export') ?>
   <?!= include('view/View_Realty') ?>
+  <?!= include('view/View_CTiming') ?>
   <?!= include('view/View_Fire') ?>
 
   <script>App.View.boot();</script>
