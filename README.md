@@ -1,6 +1,6 @@
-# 個人資產變化紀錄
+# 財富儀表板
 
-把記帳 App 匯出的複式記帳資料，變成一個可視化的個人淨值儀表板 —— 五個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析**（含各來源年度比較，固定配色），外加一頁靜態的 **FIRE 退休戰略報告**（手寫策略論述，不接帳本計算）。以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
+把記帳 App 匯出的複式記帳資料，變成一個可視化的個人淨值儀表板 —— 五個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析**（含各來源年度比較，固定配色），外加三頁靜態的**分析報告**（不動產投資報酬率、C 房賣出時機、FIRE 退休戰略；手寫論述、不接帳本計算，收在主頁籤列的「📄 報告」下拉選單裡，並支援一鍵匯出 Markdown）。以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
 
 ## 架構
 
@@ -38,10 +38,12 @@ src/view/        Core_View + View_* + View_Styles
 **頁面註冊**：每個 `View_XXX` 以 `App.View.registerPage({name, render, wire, beforeInit, reload})` 向核心註冊；
 核心負責分頁切換、初次/重載時依序呼叫各頁 hook。新增一頁＝三層各加一個 `*_XXX.html` 檔並註冊，不必改核心。
 
-**靜態頁例外（FIRE 規劃）**：純論述、不接帳本計算的頁面不需要 Model/ViewModel，也沒有 render/wire——
-只以 `registerPage({name})` 向核心註冊以納入分頁切換即可。其內容是一份純 markup 片段（`view/View_Fire_Report.html`），
-由 `index.html` 的 `<section id="view-fire">` 以 `include()` 組入；配色樣式集中在 `View_Styles.html` 的 `#view-fire` 區塊，
-對應主題變數以支援深/淺色。
+**靜態頁例外（報告類）**：不動產投資報酬率、C 房賣出時機、FIRE 退休戰略這三頁是純論述、不接帳本計算，
+不需要 Model/ViewModel，也沒有 render/wire——各以一個薄註冊檔（`view/View_{Realty,CTiming,Fire}.html`）
+呼叫 `registerPage({name})` 納入分頁切換，並綁定「匯出 Markdown」按鈕（共用 `view/View_Report_Export.html` 的 DOM→Markdown 轉換）。
+報告內容是純 markup 片段（`view/View_*_Report.html`），由 `index.html` 對應的 `<section class="report">` 以 `include()` 組入；
+三頁共用 `View_Styles.html` 的 `.report` 樣式區塊，配色對應主題變數以支援深/淺色。主頁籤列上這三頁收進「📄 報告」下拉選單，
+只留五個常看的即時儀表板在外層。
 
 資料載入有兩條路：GAS 版走 `google.script.run.getDashboardData(密碼)`；本機預覽走 `window.PRELOADED_DATA`（由 `make_preview.js` 注入）。
 
@@ -96,7 +98,7 @@ make preview    # = node tools/make_preview.js + 開啟 preview/index.html（mac
 
 先 `make setup` 安裝 [clasp](https://github.com/google/clasp)（= `npm install -g @google/clasp`）。
 
-1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "個人資產變化紀錄"`
+1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "財富儀表板"`
    會一次建立「一張新試算表 + 繫結它的 Apps Script 專案」，並產生 `.clasp.json`。
    把 `.clasp.json` 的 `rootDir` 改成 `"src"`（clasp 產生的暫存資料夾可刪除）。
    可參考 `.clasp.json.example`。
@@ -167,6 +169,7 @@ make test            # = node --test（執行 tests/ledger.test.js）
 | `src/model/Importer.html` | Model：解析 plist → 列陣列（與 `convert.py` 同結果） |
 | `src/viewmodel/Core_ViewModel.html` · `src/viewmodel/ViewModel_*.html` | ViewModel 核心（observable/init）+ 各頁狀態命令 |
 | `src/view/Core_View.html` · `src/view/View_*.html` | View 核心（工具/分頁/上傳/密碼/啟動）+ 各頁 render/wire |
-| `src/view/View_Fire.html` · `src/view/View_Fire_Report.html` | FIRE 靜態頁：前者向核心註冊分頁，後者為報告內容（純 markup） |
-| `src/view/View_Styles.html` | 樣式（CSS，含 FIRE 頁 `#view-fire` 配色） |
+| `src/view/View_{Realty,CTiming,Fire}.html` · `..._Report.html` | 三頁靜態報告（不動產報酬／C 房賣點／FIRE）：前者註冊分頁並綁匯出鈕，後者為報告內容（純 markup） |
+| `src/view/View_Report_Export.html` | 報告頁共用的 DOM→Markdown 匯出器（`App.View.bindReportExport`） |
+| `src/view/View_Styles.html` | 樣式（CSS，含報告頁共用的 `.report` 配色） |
 | `src/appsscript.json` | GAS 專案設定 |

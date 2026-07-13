@@ -51,6 +51,13 @@
     transition: all .15s;
   }
   .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  /* 報告下拉：主排的「📄 報告」觸發鈕（沿用 .tab 外觀）+ 彈出選單 */
+  .tab-menu { position: relative; }
+  .tab-trigger .caret { font-size: 10px; margin-left: 2px; opacity: .7; }
+  .tab-dropdown { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; min-width: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .menu-item { border: none; background: transparent; color: var(--text); text-align: left; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .menu-item:hover { background: rgba(127,127,127,.12); }
+  .menu-item.active { background: var(--accent); color: #fff; }
 
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
   .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }

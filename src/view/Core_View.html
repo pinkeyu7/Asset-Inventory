@@ -191,6 +191,23 @@ App.View = (function () {
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
+  // ---------- 報告下拉（主排的「📄 報告」）----------
+  //   選單項本身帶 data-view，點擊由 wireCore 統一切換頁面並收合；此處只管開/關觸發鈕。
+  function wireReportMenu() {
+    var btn = $('reportMenuBtn'), panel = $('reportMenuPanel');
+    if (!btn || !panel) return;
+    function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+    btn.onclick = function (e) {
+      e.stopPropagation();
+      var nowHidden = panel.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', nowHidden ? 'false' : 'true');
+    };
+    document.addEventListener('click', function (e) {   // 點選單外關閉
+      if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  }
+
   // ---------- 通關密碼 ----------
   function showGate() {
     $('gate').classList.remove('hidden');
@@ -224,21 +241,33 @@ App.View = (function () {
   }
 
   // ---------- 核心事件與啟動 ----------
+  var REPORT_VIEWS = { realty: true, ctiming: true, fire: true };   // 收在「報告」下拉裡的靜態頁
+
   function wireCore() {
-    document.querySelectorAll('.tab').forEach(function (t) {
+    // 分頁與報告下拉項共用 data-view，點擊即切換
+    document.querySelectorAll('[data-view]').forEach(function (t) {
       t.onclick = function () { VM.setActiveView(t.dataset.view); };
     });
     VM.on('activeViewChanged', function (v) {
-      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.view === v); });
+      document.querySelectorAll('[data-view]').forEach(function (t) { t.classList.toggle('active', t.dataset.view === v); });
+      // 報告下拉：任一報告為當前頁時觸發鈕呈 active；切換後一律收合選單
+      var trigger = $('reportMenuBtn'), panel = $('reportMenuPanel');
+      if (trigger) trigger.classList.toggle('active', !!REPORT_VIEWS[v]);
+      if (panel) { panel.classList.add('hidden'); if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
       pages.forEach(function (p) { var el = $('view-' + p.name); if (el) el.classList.toggle('hidden', p.name !== v); });
       renderActive();
     });
     if (window.matchMedia) {
-      window.matchMedia('(prefers-color-scheme: dark)').addListener(function () { renderActive(); });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { renderActive(); });
     }
-    window.addEventListener('resize', function () { renderActive(); });
+    var resizeTimer;
+    window.addEventListener('resize', function () {   // debounce：拖曳縮放時避免每幀重畫圖表
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(renderActive, 150);
+    });
     wireUpload();
     wireSettings();
+    wireReportMenu();
     wireGate();
   }
 

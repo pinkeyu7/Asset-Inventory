@@ -9,7 +9,7 @@
   <div class="wrap">
     <header>
       <div>
-        <h1>個人資產變化紀錄</h1>
+        <h1>財富儀表板</h1>
       </div>
       <!-- 設定：齒輪圖示點開面板，內含資料狀態與「上傳 source.plist」（久久一次的維護動作，不佔主畫面）。 -->
       <div class="settings hidden" id="settings">
@@ -46,9 +46,15 @@
         <button class="tab" data-view="monthly">📅 月度收支</button>
         <button class="tab" data-view="yearly">📊 年度收支</button>
         <button class="tab" data-view="income">💰 收入來源</button>
-        <button class="tab" data-view="realty">🏘️ 房產報酬</button>
-        <button class="tab" data-view="ctiming">⏳ C房賣點</button>
-        <button class="tab" data-view="fire">🏡 FIRE 規劃</button>
+        <!-- 報告：3 份靜態分析收進下拉，主排只留常看的即時儀表板 -->
+        <div class="tab-menu" id="reportMenu">
+          <button class="tab tab-trigger" id="reportMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="reportMenuPanel">📄 報告 <span class="caret">▾</span></button>
+          <div class="tab-dropdown hidden" id="reportMenuPanel" role="menu">
+            <button class="menu-item" type="button" role="menuitem" data-view="realty">🏘️ 房產報酬</button>
+            <button class="menu-item" type="button" role="menuitem" data-view="ctiming">⏳ C房賣點</button>
+            <button class="menu-item" type="button" role="menuitem" data-view="fire">🏡 FIRE 規劃</button>
+          </div>
+        </div>
       </div>
 
       <!-- 淨值趨勢 -->

@@ -31,7 +31,7 @@ function checkCode_(code) {
 /** Web App 進入點（index 為模板，會以 include() 組入 Styles/Model/ViewModel/View） */
 function doGet() {
   return HtmlService.createTemplateFromFile('index').evaluate()
-    .setTitle('個人資產變化紀錄')
+    .setTitle('財富儀表板')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -153,8 +153,16 @@ function importData(payload, code) {
       + '，差額=' + check.diff + '）');
   }
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  writeSheet_(ss, TX_SHEET, payload.transactions);
-  writeSheet_(ss, ACC_SHEET, payload.accounts || []);
+  try {
+    writeSheet_(ss, TX_SHEET, payload.transactions);
+    writeSheet_(ss, ACC_SHEET, payload.accounts || []);
+  } catch (e) {
+    // 寫入中途失敗（例如 Accounts 已寫、Transactions 未完成）可能造成兩表不一致；
+    // 一律清快取讓下次載入反映試算表真實狀態，並回報明確錯誤請使用者重新匯入。
+    clearCache();
+    throw new Error('寫入試算表時發生錯誤，資料可能不一致，請重新匯入一次'
+      + '（原始錯誤：' + (e && e.message ? e.message : e) + '）');
+  }
   clearCache();
   return buildDashboardData_();
 }
