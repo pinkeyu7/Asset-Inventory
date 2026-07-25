@@ -31,7 +31,7 @@ function checkCode_(code) {
 /** Web App 進入點（index 為模板，會以 include() 組入 Styles/Model/ViewModel/View） */
 function doGet() {
   return HtmlService.createTemplateFromFile('index').evaluate()
-    .setTitle('財富儀表板')
+    .setTitle('個人財務')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

@@ -107,10 +107,14 @@ App.View = (function () {
   }
   function showEmpty() {
     $('loading').classList.add('hidden'); $('app').classList.add('hidden');
+    // 空資料：露出二級選單容器只為顯示齒輪供首次上傳，但不顯示分頁與群組列
+    if ($('subtabs')) $('subtabs').classList.remove('hidden');
+    if ($('tabRows')) $('tabRows').classList.add('hidden');
+    if ($('groups')) $('groups').classList.add('hidden');
     if ($('settings')) $('settings').classList.remove('hidden');
     if ($('upload')) $('upload').classList.remove('hidden');
     var el = $('error'); el.classList.remove('hidden'); el.className = 'note';
-    el.textContent = '尚無資料。請點右上角「⬆️ 上傳 source.plist」匯入你的記帳檔。';
+    el.textContent = '尚無資料。請點齒輪 ⚙️ 裡的「⬆️ 上傳 source.plist」匯入你的記帳檔。';
   }
 
   // 載入資料到 Model 並完整重繪（初次載入與上傳後重載共用）
@@ -121,6 +125,9 @@ App.View = (function () {
     $('app').classList.remove('hidden');
     if ($('settings')) $('settings').classList.remove('hidden');
     if ($('upload')) $('upload').classList.remove('hidden');
+    if ($('groups')) $('groups').classList.remove('hidden');       // 顯示兩層分頁（群組列 + 頁面列 + 齒輪）
+    if ($('subtabs')) $('subtabs').classList.remove('hidden');
+    if ($('tabRows')) $('tabRows').classList.remove('hidden');      // 還原分頁（空資料時曾被隱藏）
     pages.forEach(function (p) { if (p.beforeInit) p.beforeInit(); });   // 例：趨勢頁先建起/迄選項
     VM.init();
     pages.forEach(function (p) { if (p.reload) p.reload(); });           // 例：各頁重建選單/配色
@@ -191,23 +198,6 @@ App.View = (function () {
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
-  // ---------- 報告下拉（主排的「📄 報告」）----------
-  //   選單項本身帶 data-view，點擊由 wireCore 統一切換頁面並收合；此處只管開/關觸發鈕。
-  function wireReportMenu() {
-    var btn = $('reportMenuBtn'), panel = $('reportMenuPanel');
-    if (!btn || !panel) return;
-    function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
-    btn.onclick = function (e) {
-      e.stopPropagation();
-      var nowHidden = panel.classList.toggle('hidden');
-      btn.setAttribute('aria-expanded', nowHidden ? 'false' : 'true');
-    };
-    document.addEventListener('click', function (e) {   // 點選單外關閉
-      if (!panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== btn) close();
-    });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-  }
-
   // ---------- 通關密碼 ----------
   function showGate() {
     $('gate').classList.remove('hidden');
@@ -241,19 +231,41 @@ App.View = (function () {
   }
 
   // ---------- 核心事件與啟動 ----------
-  var REPORT_VIEWS = { realty: true, ctiming: true, fire: true };   // 收在「報告」下拉裡的靜態頁
+  // 兩層分頁：群組 → 該群頁面（順序即顯示順序，需與 index.html 的 .tab-row 一致）
+  var GROUPS = {
+    dashboard: ['trend', 'composition', 'monthly', 'yearly', 'income', 'expense'],
+    report:    ['realty', 'ctiming', 'fire']
+  };
+  function groupOf(view) { return GROUPS.report.indexOf(view) >= 0 ? 'report' : 'dashboard'; }
+  // 記住每群「上次看的頁」，切回該群時回到原處（初次為該群第一頁）
+  var lastViewByGroup = { dashboard: GROUPS.dashboard[0], report: GROUPS.report[0] };
 
   function wireCore() {
-    // 分頁與報告下拉項共用 data-view，點擊即切換
-    document.querySelectorAll('[data-view]').forEach(function (t) {
+    // 子分頁（各頁）帶 data-view，點擊即切換
+    document.querySelectorAll('.tab[data-view]').forEach(function (t) {
       t.onclick = function () { VM.setActiveView(t.dataset.view); };
     });
+    // 群組列（第一層）：點擊切到該群「上次看的頁」
+    document.querySelectorAll('.group[data-group]').forEach(function (g) {
+      g.onclick = function () { VM.setActiveView(lastViewByGroup[g.dataset.group]); };
+    });
     VM.on('activeViewChanged', function (v) {
-      document.querySelectorAll('[data-view]').forEach(function (t) { t.classList.toggle('active', t.dataset.view === v); });
-      // 報告下拉：任一報告為當前頁時觸發鈕呈 active；切換後一律收合選單
-      var trigger = $('reportMenuBtn'), panel = $('reportMenuPanel');
-      if (trigger) trigger.classList.toggle('active', !!REPORT_VIEWS[v]);
-      if (panel) { panel.classList.add('hidden'); if (trigger) trigger.setAttribute('aria-expanded', 'false'); }
+      var grp = groupOf(v);
+      lastViewByGroup[grp] = v;
+      // 子分頁 active 狀態
+      document.querySelectorAll('.tab[data-view]').forEach(function (t) { t.classList.toggle('active', t.dataset.view === v); });
+      // 群組 active 狀態；只顯示當前群組那一列頁面
+      document.querySelectorAll('.group[data-group]').forEach(function (g) { g.classList.toggle('active', g.dataset.group === grp); });
+      document.querySelectorAll('.tab-row[data-group]').forEach(function (r) { r.classList.toggle('hidden', r.dataset.group !== grp); });
+      // 齒輪（資料狀態 + 上傳）為「財富儀表板」群專屬：切到報告群時隱藏並收合面板
+      var settingsEl = $('settings');
+      if (settingsEl) {
+        settingsEl.classList.toggle('hidden', grp !== 'dashboard');
+        if (grp !== 'dashboard') {
+          if ($('settingsPanel')) $('settingsPanel').classList.add('hidden');
+          if ($('settingsBtn')) $('settingsBtn').setAttribute('aria-expanded', 'false');
+        }
+      }
       pages.forEach(function (p) { var el = $('view-' + p.name); if (el) el.classList.toggle('hidden', p.name !== v); });
       renderActive();
     });
@@ -267,7 +279,6 @@ App.View = (function () {
     });
     wireUpload();
     wireSettings();
-    wireReportMenu();
     wireGate();
   }
 

@@ -17,12 +17,21 @@
     font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 20px 16px 60px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 60px; }
+  /* 一級選單：固定於頁面頂端（標題 + 群組列），捲動時保持可見；二級選單捲動時從其下方滑過並被遮住 */
+  .app-header { position: sticky; top: 0; z-index: 30; background: var(--bg); padding: 16px 0 12px; border-bottom: 1px solid var(--border); }
+  .header-bar { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .brand { display: flex; align-items: baseline; gap: 8px 20px; flex-wrap: wrap; }
   h1 { font-size: 20px; margin: 0; font-weight: 700; }
+  /* 群組列（第一層）：文字＋底線的分頁，與子分頁的膠囊外觀區隔出層級 */
+  .groups { display: flex; gap: 4px; }
+  .group { border: none; background: transparent; color: var(--muted); padding: 4px 2px; margin: 0 6px; cursor: pointer; font-size: 15px; font-weight: 700; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .group:first-child { margin-left: 0; }
+  .group:hover { color: var(--text); }
+  .group.active { color: var(--text); border-bottom-color: var(--accent); }
   .sub { color: var(--muted); font-size: 12px; }
-  /* 設定：齒輪按鈕 + 彈出面板（右上角 dropdown） */
-  .settings { position: relative; }
+  /* 設定：齒輪按鈕 + 彈出面板。位於二級選單右端（維護動作，不佔頂端主位置） */
+  .settings { position: relative; flex: none; margin-left: auto; }
   .settings-btn { border: 1px solid var(--border); background: var(--card); color: var(--text); width: 38px; height: 38px; border-radius: 999px; cursor: pointer; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
   .settings-btn:hover { border-color: var(--accent); }
   .settings-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 260px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
@@ -44,20 +53,16 @@
   .gate-box .upload-btn { width: 100%; }
   .gate-err { color: var(--liab); font-size: 12px; margin-top: 10px; min-height: 16px; }
 
-  .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  /* 二級選單（頁面列）：不固定，隨頁面捲動。左為各群膠囊分頁，右端為齒輪；只顯示當前群組那一列 .tab-row */
+  .subtabs { display: flex; align-items: flex-start; gap: 10px; padding: 14px 0; }
+  .tab-rows { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tab-row { display: flex; gap: 6px; flex-wrap: wrap; }
   .tab {
     border: 1px solid var(--border); background: var(--card); color: var(--text);
     padding: 9px 16px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600;
     transition: all .15s;
   }
   .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  /* 報告下拉：主排的「📄 報告」觸發鈕（沿用 .tab 外觀）+ 彈出選單 */
-  .tab-menu { position: relative; }
-  .tab-trigger .caret { font-size: 10px; margin-left: 2px; opacity: .7; }
-  .tab-dropdown { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; min-width: 160px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
-  .menu-item { border: none; background: transparent; color: var(--text); text-align: left; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; white-space: nowrap; }
-  .menu-item:hover { background: rgba(127,127,127,.12); }
-  .menu-item.active { background: var(--accent); color: #fff; }
 
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
   .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }

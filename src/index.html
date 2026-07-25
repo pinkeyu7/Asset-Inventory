@@ -7,11 +7,40 @@
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div>
-        <h1>財富儀表板</h1>
+    <!-- 一級選單：固定於頁面頂端（網站標題 + 群組列），捲動時保持可見 -->
+    <header class="app-header">
+      <div class="header-bar">
+        <div class="brand">
+          <h1>個人財務</h1>
+          <!-- 群組列（第一層）：切換後顯示該群的頁面列；資料載入後才顯示 -->
+          <nav class="groups hidden" id="groups" aria-label="分類">
+            <button class="group active" type="button" data-group="dashboard">財富儀表板</button>
+            <button class="group" type="button" data-group="report">個人報告</button>
+          </nav>
+        </div>
       </div>
-      <!-- 設定：齒輪圖示點開面板，內含資料狀態與「上傳 source.plist」（久久一次的維護動作，不佔主畫面）。 -->
+    </header>
+
+    <!-- 二級選單（頁面列）：不固定，隨頁面一起捲動。左為各群分頁（只顯示當前群組那一列），
+         右端放齒輪（資料狀態 + 上傳 source.plist）——為「財富儀表板」群專屬，切到報告群由 Core_View 隱藏。
+         資料載入後才顯示；空資料時只露齒輪（隱藏分頁）以便首次上傳。 -->
+    <nav class="subtabs hidden" id="subtabs" aria-label="分頁">
+      <div class="tab-rows" id="tabRows">
+        <div class="tab-row" data-group="dashboard">
+          <button class="tab active" data-view="trend">📈 淨值趨勢</button>
+          <button class="tab" data-view="composition">🥧 資產組成</button>
+          <button class="tab" data-view="monthly">📅 月度收支</button>
+          <button class="tab" data-view="yearly">📊 年度收支</button>
+          <button class="tab" data-view="income">💰 收入來源</button>
+          <button class="tab" data-view="expense">💸 支出結構</button>
+        </div>
+        <div class="tab-row hidden" data-group="report">
+          <button class="tab" data-view="realty">🏘️ 房產報酬</button>
+          <button class="tab" data-view="ctiming">⏳ C房賣點</button>
+          <button class="tab" data-view="fire">🏡 FIRE 規劃</button>
+        </div>
+      </div>
+      <!-- 齒輪：二級選單右端，儀表板群專屬（久久一次的維護動作，不佔主畫面） -->
       <div class="settings hidden" id="settings">
         <button class="settings-btn" id="settingsBtn" type="button" aria-label="設定" aria-expanded="false" aria-controls="settingsPanel">⚙️</button>
         <div class="settings-panel hidden" id="settingsPanel">
@@ -27,7 +56,7 @@
           </div>
         </div>
       </div>
-    </header>
+    </nav>
 
     <div id="gate" class="gate hidden">
       <div class="gate-box">
@@ -39,25 +68,8 @@
     </div>
 
     <div id="loading" class="loading"><div class="spin"></div><div style="margin-top:10px">載入資料中…</div></div>
-    <div id="app" class="hidden">
-      <div class="tabs">
-        <button class="tab active" data-view="trend">📈 淨值趨勢</button>
-        <button class="tab" data-view="composition">🥧 資產組成</button>
-        <button class="tab" data-view="monthly">📅 月度收支</button>
-        <button class="tab" data-view="yearly">📊 年度收支</button>
-        <button class="tab" data-view="income">💰 收入來源</button>
-        <button class="tab" data-view="expense">💸 支出結構</button>
-        <!-- 報告：3 份靜態分析收進下拉，主排只留常看的即時儀表板 -->
-        <div class="tab-menu" id="reportMenu">
-          <button class="tab tab-trigger" id="reportMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="reportMenuPanel">📄 報告 <span class="caret">▾</span></button>
-          <div class="tab-dropdown hidden" id="reportMenuPanel" role="menu">
-            <button class="menu-item" type="button" role="menuitem" data-view="realty">🏘️ 房產報酬</button>
-            <button class="menu-item" type="button" role="menuitem" data-view="ctiming">⏳ C房賣點</button>
-            <button class="menu-item" type="button" role="menuitem" data-view="fire">🏡 FIRE 規劃</button>
-          </div>
-        </div>
-      </div>
 
+    <div id="app" class="hidden">
       <!-- 淨值趨勢 -->
       <section id="view-trend">
         <div class="kpis" id="kpis"></div>

@@ -1,6 +1,11 @@
-# 財富儀表板
+# 個人財務
 
-把記帳 App 匯出的複式記帳資料，變成一個可視化的個人淨值儀表板 —— 五個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析**（含各來源年度比較，固定配色），外加三頁靜態的**分析報告**（不動產投資報酬率、C 房賣出時機、FIRE 退休戰略；手寫論述、不接帳本計算，收在主頁籤列的「📄 報告」下拉選單裡，並支援一鍵匯出 Markdown）。以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
+把記帳 App 匯出的複式記帳資料，變成一個可視化的個人財務網站。導覽採**兩層分頁**，收在固定於頁面頂端的 header：
+
+- **財富儀表板**（第一群）—— 六個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析、支出結構**（收入／支出含各項目年度比較，固定配色）。
+- **個人報告**（第二群）—— 三頁靜態的**分析報告**（不動產投資報酬率、C 房賣出時機、FIRE 退休戰略；手寫論述、不接帳本計算，支援一鍵匯出 Markdown）。
+
+以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
 
 ## 架構
 
@@ -46,8 +51,12 @@ src/view/        Core_View + View_* + View_Styles
 不需要 Model/ViewModel，也沒有 render/wire——各以一個薄註冊檔（`view/View_{Realty,CTiming,Fire}.html`）
 呼叫 `registerPage({name})` 納入分頁切換，並綁定「匯出 Markdown」按鈕（共用 `view/View_Report_Export.html` 的 DOM→Markdown 轉換）。
 報告內容是純 markup 片段（`view/View_*_Report.html`），由 `index.html` 對應的 `<section class="report">` 以 `include()` 組入；
-三頁共用 `View_Styles.html` 的 `.report` 樣式區塊，配色對應主題變數以支援深/淺色。主頁籤列上這三頁收進「📄 報告」下拉選單，
-只留五個常看的即時儀表板在外層。
+三頁共用 `View_Styles.html` 的 `.report` 樣式區塊，配色對應主題變數以支援深/淺色。
+
+**兩層分頁導覽**：頁面分成兩群——「財富儀表板」（六個即時儀表板）與「個人報告」（三頁靜態報告）。
+固定於頂端的 header 內，第一層是群組列（`.group[data-group]`），第二層是該群的頁面列（`.tab-row[data-group]` 內的 `.tab[data-view]`），
+只顯示當前群組那一列。群組↔頁面的歸屬由 `Core_View` 的 `GROUPS` 決定（順序需與 `index.html` 的 `.tab-row` 一致）；
+點群組會切到該群「上次看的頁」（`lastViewByGroup`）。實際頁面切換仍走既有的 `data-view` → `VM.setActiveView`，各頁註冊方式不變。
 
 資料載入有兩條路：GAS 版走 `google.script.run.getDashboardData(密碼)`；本機預覽走 `window.PRELOADED_DATA`（由 `make_preview.js` 注入）。
 
@@ -144,7 +153,7 @@ make preview    # = node tools/make_preview.js + 開啟 preview/index.html（mac
 
 先 `make setup` 安裝 [clasp](https://github.com/google/clasp)（= `npm install -g @google/clasp`）。
 
-1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "財富儀表板"`
+1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "個人財務"`
    會一次建立「一張新試算表 + 繫結它的 Apps Script 專案」，並產生 `.clasp.json`。
    把 `.clasp.json` 的 `rootDir` 改成 `"src"`（clasp 產生的暫存資料夾可刪除）。
    可參考 `.clasp.json.example`。
@@ -178,7 +187,7 @@ Apps Script 編輯器 → `專案設定 ⚙️ → 指令碼屬性` → 新增�
 ### 4. 更新資料
 
 **最簡單：在網頁上傳**（部署後）
-直接開啟網頁應用程式 → 點右上角「⬆️ 上傳 source.plist」→ 選檔。
+直接開啟網頁應用程式 → 在「財富儀表板」群分頁列右端的齒輪 ⚙️ 裡點「⬆️ 上傳 source.plist」→ 選檔。
 瀏覽器會在前端解析 plist、送到後端寫入 `Transactions`/`Accounts` 工作表、
 清快取並自動重繪，無需手動跑 `convert.py` 或匯入 CSV。
 
