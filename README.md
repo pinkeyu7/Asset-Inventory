@@ -1,9 +1,10 @@
-# 個人財務
+# The Ledger
 
-把記帳 App 匯出的複式記帳資料，變成一個可視化的個人財務網站。導覽採**兩層分頁**，收在固定於頁面頂端的 header：
+把記帳 App 匯出的複式記帳資料，變成一個可視化的個人財務網站（站名 **The Ledger**）。導覽採**兩層分頁**，收在固定於頁面頂端的 header，分三群：
 
 - **財富儀表板**（第一群）—— 六個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析、支出結構**（收入／支出含各項目年度比較，固定配色）。
 - **個人報告**（第二群）—— 三頁靜態的**分析報告**（不動產投資報酬率、C 房賣出時機、FIRE 退休戰略；手寫論述、不接帳本計算，支援一鍵匯出 Markdown）。
+- **人物畫像**（第三群・單頁）—— 一頁由帳本反推的敘事式人物側寫（暖金雜誌風，自帶 scope 在 `.portrait` 下的樣式）。單頁群組不設二級列，點一級即直接進頁。
 
 以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
 
@@ -53,10 +54,11 @@ src/view/        Core_View + View_* + View_Styles
 報告內容是純 markup 片段（`view/View_*_Report.html`），由 `index.html` 對應的 `<section class="report">` 以 `include()` 組入；
 三頁共用 `View_Styles.html` 的 `.report` 樣式區塊，配色對應主題變數以支援深/淺色。
 
-**兩層分頁導覽**：頁面分成兩群——「財富儀表板」（六個即時儀表板）與「個人報告」（三頁靜態報告）。
+**兩層分頁導覽**：頁面分成三群——「財富儀表板」（六個即時儀表板）、「個人報告」（三頁靜態報告）與「人物畫像」（單頁）。
 固定於頂端的 header 內，第一層是群組列（`.group[data-group]`），第二層是該群的頁面列（`.tab-row[data-group]` 內的 `.tab[data-view]`），
 只顯示當前群組那一列。群組↔頁面的歸屬由 `Core_View` 的 `GROUPS` 決定（順序需與 `index.html` 的 `.tab-row` 一致）；
 點群組會切到該群「上次看的頁」（`lastViewByGroup`）。實際頁面切換仍走既有的 `data-view` → `VM.setActiveView`，各頁註冊方式不變。
+**單頁群組**（如人物畫像）在 `GROUPS` 只列一頁、且不設對應的 `.tab-row`；此時整條二級列自動收起（`activeViewChanged` 以 `.tab-row[data-group]` 是否存在判斷），點一級群組即直接進頁。
 
 資料載入有兩條路：GAS 版走 `google.script.run.getDashboardData(密碼)`；本機預覽走 `window.PRELOADED_DATA`（由 `make_preview.js` 注入）。
 
@@ -153,7 +155,7 @@ make preview    # = node tools/make_preview.js + 開啟 preview/index.html（mac
 
 先 `make setup` 安裝 [clasp](https://github.com/google/clasp)（= `npm install -g @google/clasp`）。
 
-1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "個人財務"`
+1. **建立繫結試算表的專案**：`clasp create-script --type sheets --title "The Ledger"`
    會一次建立「一張新試算表 + 繫結它的 Apps Script 專案」，並產生 `.clasp.json`。
    把 `.clasp.json` 的 `rootDir` 改成 `"src"`（clasp 產生的暫存資料夾可刪除）。
    可參考 `.clasp.json.example`。
@@ -227,6 +229,7 @@ make test            # = node --test（執行 tests/ledger.test.js）
 | `src/viewmodel/Core_ViewModel.html` · `src/viewmodel/ViewModel_*.html` | ViewModel 核心（observable/init）+ 各頁狀態命令 |
 | `src/view/Core_View.html` · `src/view/View_*.html` | View 核心（工具/分頁/上傳/密碼/啟動）+ 各頁 render/wire |
 | `src/view/View_{Realty,CTiming,Fire}.html` · `..._Report.html` | 三頁靜態報告（不動產報酬／C 房賣點／FIRE）：前者註冊分頁並綁匯出鈕，後者為報告內容（純 markup） |
+| `src/view/View_Portrait.html` · `View_Portrait_Report.html` | 人物畫像（單頁群組）：前者註冊分頁，後者為內容＋scope 在 `.portrait` 下的專屬樣式（由 `personal.html` 改寫） |
 | `src/view/View_Report_Export.html` | 報告頁共用的 DOM→Markdown 匯出器（`App.View.bindReportExport`） |
 | `src/view/View_Styles.html` | 樣式（CSS，含報告頁共用的 `.report` 配色） |
 | `src/appsscript.json` | GAS 專案設定 |

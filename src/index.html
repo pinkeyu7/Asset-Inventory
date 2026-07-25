@@ -11,11 +11,12 @@
     <header class="app-header">
       <div class="header-bar">
         <div class="brand">
-          <h1>個人財務</h1>
+          <h1>The Ledger</h1>
           <!-- 群組列（第一層）：切換後顯示該群的頁面列；資料載入後才顯示 -->
           <nav class="groups hidden" id="groups" aria-label="分類">
             <button class="group active" type="button" data-group="dashboard">財富儀表板</button>
             <button class="group" type="button" data-group="report">個人報告</button>
+            <button class="group" type="button" data-group="portrait">人物畫像</button>
           </nav>
         </div>
       </div>
@@ -190,6 +191,11 @@
       <section id="view-fire" class="report hidden">
         <?!= include('view/View_Fire_Report') ?>
       </section>
+
+      <!-- 人物畫像（單頁群組）：由 personal.html 改寫，樣式全 scope 在 .portrait 下，避免與儀表板/報告撞名 -->
+      <section id="view-portrait" class="portrait hidden">
+        <?!= include('view/View_Portrait_Report') ?>
+      </section>
     </div>
     <div id="error" class="hidden"></div>
   </div>
@@ -228,6 +234,7 @@
   <?!= include('view/View_Realty') ?>
   <?!= include('view/View_CTiming') ?>
   <?!= include('view/View_Fire') ?>
+  <?!= include('view/View_Portrait') ?>
 
   <script>App.View.boot();</script>
 </body>

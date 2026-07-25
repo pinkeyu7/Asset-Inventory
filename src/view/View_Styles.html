@@ -16,11 +16,13 @@
     margin: 0; background: var(--bg); color: var(--text);
     font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;   /* 擋掉人物畫像全幅出血（100vw + 捲軸寬）造成的橫向捲動；clip 不建立捲動容器，不影響 sticky header */
   }
   .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 60px; }
-  /* 一級選單：固定於頁面頂端（標題 + 群組列），捲動時保持可見；二級選單捲動時從其下方滑過並被遮住 */
-  .app-header { position: sticky; top: 0; z-index: 30; background: var(--bg); padding: 16px 0 12px; border-bottom: 1px solid var(--border); }
-  .header-bar { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  /* 一級選單：固定於頁面頂端（標題 + 群組列），捲動時保持可見；二級選單捲動時從其下方滑過並被遮住。
+     背景全寬（掙脫 .wrap 置中），使其與人物畫像的全幅出血一致、不再像窄盒子；內容仍置中對齊內容欄。 */
+  .app-header { position: sticky; top: 0; z-index: 30; background: var(--bg); width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 0 12px; border-bottom: 1px solid var(--border); }
+  .header-bar { max-width: 1040px; margin: 0 auto; padding: 0 16px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
   .brand { display: flex; align-items: baseline; gap: 8px 20px; flex-wrap: wrap; }
   h1 { font-size: 20px; margin: 0; font-weight: 700; }
   /* 群組列（第一層）：文字＋底線的分頁，與子分頁的膠囊外觀區隔出層級 */

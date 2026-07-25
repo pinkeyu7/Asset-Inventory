@@ -231,14 +231,19 @@ App.View = (function () {
   }
 
   // ---------- 核心事件與啟動 ----------
-  // 兩層分頁：群組 → 該群頁面（順序即顯示順序，需與 index.html 的 .tab-row 一致）
+  // 兩層分頁：群組 → 該群頁面（順序即顯示順序，需與 index.html 的 .tab-row 一致）。
+  // 單頁群組（如 portrait 人物畫像）只列一頁、不設二級 .tab-row，點一級即直接進頁。
   var GROUPS = {
     dashboard: ['trend', 'composition', 'monthly', 'yearly', 'income', 'expense'],
-    report:    ['realty', 'ctiming', 'fire']
+    report:    ['realty', 'ctiming', 'fire'],
+    portrait:  ['portrait']
   };
-  function groupOf(view) { return GROUPS.report.indexOf(view) >= 0 ? 'report' : 'dashboard'; }
+  function groupOf(view) {
+    for (var g in GROUPS) if (GROUPS.hasOwnProperty(g) && GROUPS[g].indexOf(view) >= 0) return g;
+    return 'dashboard';
+  }
   // 記住每群「上次看的頁」，切回該群時回到原處（初次為該群第一頁）
-  var lastViewByGroup = { dashboard: GROUPS.dashboard[0], report: GROUPS.report[0] };
+  var lastViewByGroup = { dashboard: GROUPS.dashboard[0], report: GROUPS.report[0], portrait: GROUPS.portrait[0] };
 
   function wireCore() {
     // 子分頁（各頁）帶 data-view，點擊即切換
@@ -257,6 +262,9 @@ App.View = (function () {
       // 群組 active 狀態；只顯示當前群組那一列頁面
       document.querySelectorAll('.group[data-group]').forEach(function (g) { g.classList.toggle('active', g.dataset.group === grp); });
       document.querySelectorAll('.tab-row[data-group]').forEach(function (r) { r.classList.toggle('hidden', r.dataset.group !== grp); });
+      // 單頁群組（無二級 .tab-row，如 portrait）整條二級列收起，點一級直接進頁
+      var hasTabs = !!document.querySelector('.tab-row[data-group="' + grp + '"]');
+      if ($('subtabs')) $('subtabs').classList.toggle('hidden', !hasTabs);
       // 齒輪（資料狀態 + 上傳）為「財富儀表板」群專屬：切到報告群時隱藏並收合面板
       var settingsEl = $('settings');
       if (settingsEl) {

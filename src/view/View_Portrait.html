@@ -1,0 +1,9 @@
+<script>
+// View（人物畫像）：單頁靜態內容，由 personal.html 改寫。
+//   內容與其專屬樣式都在 view/View_Portrait_Report.html（樣式 scope 在 .portrait 下）。
+//   單頁群組——在 Core_View 的 GROUPS 裡登記為 portrait: ['portrait']，點一級「👤 人物畫像」直接進頁、不顯示二級列。
+//   純靜態、無帳本計算，故不設 Model／ViewModel，也無 render/wire。
+(function () {
+  App.View.registerPage({ name: 'portrait' });
+})();
+</script>

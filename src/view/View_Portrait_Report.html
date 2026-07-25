@@ -1,0 +1,297 @@
+<!-- 人物畫像（靜態內容）：由 personal.html 改寫，組入 index.html 的 <section id="view-portrait" class="portrait">。
+     所有 CSS 都 scope 在 .portrait 底下（原檔用 body/section/h1/.card/.wrap… 等通用選擇器，會與儀表板/報告撞名）。
+     深/淺色跟隨系統 prefers-color-scheme，與主 app 一致。 -->
+<style>
+  /* ---- 調色盤：藍偏墨的中性 + 儀表琥珀金 / 帳本綠 / 支出陶（scope 在 .portrait） ---- */
+  .portrait {
+    --paper: #eef0ec; --surface: #ffffff; --surface-2: #f6f7f3;
+    --ink: #171d26; --ink-soft: #4a5462; --ink-faint: #7b8593;
+    --line: #d9dcd4; --line-strong: #c3c7bd;
+    --gauge: #c8892a; --gauge-bright: #e0a338;
+    --jade: #3f8a6e; --clay: #b0533f;
+    --gauge-glow: rgba(200,137,42,0.16);
+    background: var(--paper); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+    line-height: 1.7; letter-spacing: 0.01em;
+    /* 全幅出血：掙脫 app .wrap 的置中與內邊距，讓紙感底＋hero 光暈延伸到視窗兩側（找回原網頁的大器感）。
+       非卡片，故不加圓角/陰影；body 設 overflow-x: clip 擋掉 100vw 與捲軸寬造成的橫向捲動。 */
+    width: 100vw; margin-left: calc(50% - 50vw);
+    /* 暖底往下多鋪一段、蓋掉 app .wrap 底部 padding(60px) 露出的灰底；等量負邊距抵銷、總高不變 */
+    padding-bottom: 60px; margin-bottom: -60px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .portrait {
+      --paper: #0d1119; --surface: #141a24; --surface-2: #10151d;
+      --ink: #e8ebe6; --ink-soft: #a7b0ba; --ink-faint: #6d7784;
+      --line: #232c39; --line-strong: #313c4c;
+      --gauge: #e6ac3f; --gauge-bright: #f5c15a;
+      --jade: #63b491; --clay: #d47a63;
+      --gauge-glow: rgba(230,172,63,0.20);
+    }
+  }
+  .portrait .mono {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+  }
+  .portrait .wrap { max-width: 940px; margin: 0 auto; padding: 0 22px; }
+
+  /* ---- hero ---- */
+  .portrait .hero {
+    border-bottom: 1px solid var(--line);
+    background: radial-gradient(120% 90% at 85% -10%, var(--gauge-glow), transparent 55%);
+    padding: 60px 0 44px;
+  }
+  .portrait .eyebrow {
+    font-size: 11px; letter-spacing: 0.42em; text-transform: uppercase;
+    color: var(--gauge); font-weight: 700; margin: 0 0 20px;
+  }
+  .portrait .eyebrow .dot { color: var(--ink-faint); margin: 0 8px; letter-spacing: 0; }
+  .portrait h1 {
+    font-size: clamp(28px, 5.4vw, 48px);
+    line-height: 1.08; margin: 0 0 20px; font-weight: 800;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .portrait h1 .hl { color: var(--gauge-bright); }
+  .portrait .thesis {
+    font-size: clamp(15px, 2.1vw, 19px); color: var(--ink-soft);
+    max-width: 60ch; margin: 0; font-weight: 400;
+  }
+  .portrait .filing {
+    display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 26px;
+    font-size: 12px; color: var(--ink-faint); letter-spacing: 0.04em;
+  }
+  .portrait .filing b { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---- gauge cluster ---- */
+  .portrait .cluster {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    margin: -28px auto 0; position: relative; z-index: 1;
+  }
+  .portrait .gauge {
+    background: var(--surface); padding: 20px 18px 18px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .portrait .gauge .k { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; }
+  .portrait .gauge .v { font-size: clamp(22px, 3.6vw, 30px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; }
+  .portrait .gauge .v small { font-size: 0.5em; font-weight: 700; color: var(--ink-soft); margin-left: 2px; letter-spacing: 0; }
+  .portrait .gauge .s { font-size: 11.5px; color: var(--ink-faint); }
+  .portrait .gauge .v.amber { color: var(--gauge-bright); }
+  .portrait .gauge .v.jade { color: var(--jade); }
+
+  /* ---- sections ---- */
+  .portrait section { padding: 44px 0; border-bottom: 1px solid var(--line); }
+  .portrait .shead { display: flex; align-items: baseline; gap: 14px; margin: 0 0 26px; }
+  .portrait .snum { font-size: 12px; font-weight: 700; color: var(--gauge); letter-spacing: 0.1em; }
+  .portrait .shead h2 { font-size: clamp(20px, 3vw, 26px); margin: 0; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+  .portrait .lead { color: var(--ink-soft); max-width: 64ch; margin: -12px 0 26px; font-size: 15.5px; }
+
+  /* timeline */
+  .portrait .track { display: flex; flex-direction: column; gap: 0; }
+  .portrait .stop { display: grid; grid-template-columns: 96px 1fr; gap: 20px; padding: 16px 0; position: relative; }
+  .portrait .stop:not(:last-child) { border-bottom: 1px dashed var(--line); }
+  .portrait .stop .yr { font-size: 13px; color: var(--ink-faint); font-weight: 700; padding-top: 2px; }
+  .portrait .stop h3 { margin: 0 0 4px; font-size: 17px; font-weight: 700; color: var(--ink); }
+  .portrait .stop h3 .tag { font-size: 11px; font-weight: 700; color: var(--gauge); border: 1px solid var(--line-strong); border-radius: 999px; padding: 1px 9px; margin-left: 8px; vertical-align: middle; letter-spacing: 0.04em; }
+  .portrait .stop p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+  .portrait .stop .pay { color: var(--jade); font-weight: 700; }
+
+  /* income bar */
+  .portrait .incbar { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .portrait .row { display: grid; grid-template-columns: 52px 1fr 118px; align-items: center; gap: 14px; }
+  .portrait .row .yl { font-size: 13px; color: var(--ink-faint); font-weight: 700; }
+  .portrait .bar { height: 22px; border-radius: 5px; background: linear-gradient(90deg, var(--gauge), var(--gauge-bright)); position: relative; }
+  .portrait .bar.exp { background: repeating-linear-gradient(45deg, var(--clay), var(--clay) 6px, color-mix(in srgb, var(--clay) 78%, #000) 6px, color-mix(in srgb, var(--clay) 78%, #000) 12px); opacity: 0.9; border-radius: 5px; }
+  .portrait .rowval { font-size: 13px; text-align: right; color: var(--ink-soft); }
+  .portrait .rowval .save { color: var(--jade); font-weight: 700; }
+  .portrait .legend { display: flex; gap: 18px; font-size: 12px; color: var(--ink-faint); margin-top: 16px; }
+  .portrait .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+  /* two-col cards */
+  .portrait .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .portrait .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .portrait .card h3 { margin: 0 0 14px; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 9px; color: var(--ink); }
+  .portrait .card h3 .ic { color: var(--gauge); }
+  .portrait .fleet { display: flex; flex-wrap: wrap; gap: 8px; }
+  .portrait .chip { font-size: 12.5px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 5px 11px; color: var(--ink-soft); background: var(--surface-2); }
+  .portrait .chip.hi { border-color: var(--gauge); color: var(--gauge-bright); font-weight: 700; }
+  .portrait .destlist { display: flex; flex-direction: column; gap: 9px; margin-top: 2px; }
+  .portrait .dest { display: grid; grid-template-columns: 62px 1fr 30px; align-items: center; gap: 10px; font-size: 13px; }
+  .portrait .dest .dl { color: var(--ink-soft); font-weight: 600; }
+  .portrait .dest .db { height: 8px; border-radius: 4px; background: var(--gauge); opacity: 0.85; }
+  .portrait .dest .dn { text-align: right; color: var(--ink-faint); }
+
+  /* values grid */
+  .portrait .vals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .portrait .val h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; color: var(--ink); }
+  .portrait .val h3 .n { color: var(--gauge); font-weight: 700; margin-right: 7px; }
+  .portrait .val p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+  .portrait .kicker { color: var(--ink); font-weight: 700; }
+  .portrait .pull {
+    margin: 4px 0 0; font-size: clamp(18px, 2.6vw, 23px); line-height: 1.45;
+    font-weight: 700; letter-spacing: -0.01em; max-width: 30ch; color: var(--ink);
+  }
+  .portrait .pull .hl { color: var(--gauge-bright); }
+  .portrait footer { padding: 30px 0 44px; color: var(--ink-faint); font-size: 12px; }
+  .portrait footer .disc { border-left: 2px solid var(--line-strong); padding-left: 12px; max-width: 70ch; }
+
+  @media (max-width: 640px) {
+    .portrait .cluster { grid-template-columns: repeat(2, 1fr); }
+    .portrait .cols, .portrait .vals { grid-template-columns: 1fr; }
+    .portrait .row { grid-template-columns: 44px 1fr 92px; gap: 9px; }
+    .portrait .stop { grid-template-columns: 72px 1fr; gap: 14px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .portrait .bar, .portrait .dest .db { animation: portraitGrow 0.9s cubic-bezier(.2,.7,.2,1) both; transform-origin: left; }
+    @keyframes portraitGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+</style>
+
+<div class="hero">
+  <div class="wrap">
+    <p class="eyebrow">個人財務檔案 <span class="dot">/</span> 帳本人物畫像 <span class="dot">/</span> 2013–2026</p>
+    <h1>一位把人生<span class="hl">記到小數點</span>的<br>科技人 × 隱形包租公</h1>
+    <p class="thesis">長年深耕科技業、還斜槓兼差家教的理性工程人。正職收入穩定翻倍，兼職加菜；賺來的錢用房產與定存錢滾錢，生活則全押在重機與亞洲深度旅行，並年年孝敬母親。</p>
+    <div class="filing">
+      <span><b>觀察區間</b>　13 年</span>
+      <span><b>交易筆數</b>　2,251 筆</span>
+      <span><b>記帳系統</b>　複式簿記（資產／負債／收入／支出）</span>
+      <span><b>對帳時間</b>　午休 12:00 高峰 · 睡前 22–01 點（台北時間）</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="cluster">
+    <div class="gauge">
+      <span class="k">累計收入</span>
+      <span class="v amber">2,431<small>萬</small></span>
+      <span class="s mono">13 年總入帳</span>
+    </div>
+    <div class="gauge">
+      <span class="k">淨儲蓄</span>
+      <span class="v jade">1,424<small>萬</small></span>
+      <span class="s mono">收入 − 支出</span>
+    </div>
+    <div class="gauge">
+      <span class="k">2026 儲蓄率</span>
+      <span class="v">76<small>%</small></span>
+      <span class="s mono">賺 4 塊存 3 塊</span>
+    </div>
+    <div class="gauge">
+      <span class="k">收入成長</span>
+      <span class="v">6<small>×</small></span>
+      <span class="s mono">62萬 → 362萬／年</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <div class="shead"><span class="snum">01</span><h2>職涯軌跡：不是直線，而是一路往上爬的階梯</h2></div>
+    <p class="lead">從大陸工作起步，回台後歷經資遣、失業接案的低谷，再靠一次次轉職把月薪從 3 萬拉到 12 萬——這是一條有跌有起、但始終向上的路。</p>
+    <div class="track">
+      <div class="stop">
+        <span class="yr mono">〜2013</span>
+        <div><h3>大陸工作<span class="tag">起點</span></h3><p>職涯早期在中國大陸就業；被積欠的一筆年終，直到 <span class="pay">2021 年才討回、換匯 51.7 萬</span>回台——一討就是八年，不放棄該拿的錢。</p></div>
+      </div>
+      <div class="stop">
+        <span class="yr mono">2014–19</span>
+        <div><h3>學悅<span class="tag">被資遣</span></h3><p>月薪 <span class="pay">3 萬 → 6 萬</span>穩定累積；2019/09 遭資遣，領 <span class="pay">16.6 萬資遣費</span>畫下句點。</p></div>
+      </div>
+      <div class="stop">
+        <span class="yr mono">2019–20</span>
+        <div><h3>失業 × 接案<span class="tag">低谷過渡</span></h3><p>領失業給付，同時以 <span class="pay">時薪 400</span> 接案硬撐；沒有停止進帳，也照樣按月記帳。</p></div>
+      </div>
+      <div class="stop">
+        <span class="yr mono">2020–24</span>
+        <div><h3>展綠 → 艾希英 → 雅婷智慧<span class="tag">轉職三級跳</span></h3><p>一家換過一家往上談，月薪 <span class="pay">6 萬 → 7 萬 → 11 萬</span>；每次跳槽都是一次加薪。</p></div>
+      </div>
+      <div class="stop">
+        <span class="yr mono">2024.07–</span>
+        <div><h3>群暉 Synology<span class="tag">現職</span></h3><p>月薪約 <span class="pay">12 萬</span>＋中秋獎金、留任金；已把薪資預登記到 2027 年——超前部署。</p></div>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:28px;margin-bottom:0;"><span class="kicker">副業／斜槓：</span>不論在職或失業，長年靠「上課收入」接家教、代課（思彤、達禮、忠信…）加菜，累計 <b>499 萬</b>——永遠替自己準備第二條金流。</p>
+  </section>
+
+  <section>
+    <div class="shead"><span class="snum">02</span><h2>金錢 DNA：不只會存，還讓錢生錢</h2></div>
+    <p class="lead">收入逐年墊高、支出按住不放，結餘一路擴大。他不是死存戶，而是主動的資產配置者。</p>
+    <div class="incbar">
+      <div class="row"><span class="yl mono">2016</span><div class="bar" style="width:31%"></div><span class="rowval mono">收 113萬 · <span class="save">存 64萬</span></span></div>
+      <div class="row"><span class="yl mono">2019</span><div class="bar" style="width:42%"></div><span class="rowval mono">收 151萬 · <span class="save">存 75萬</span></span></div>
+      <div class="row"><span class="yl mono">2021</span><div class="bar" style="width:63%"></div><span class="rowval mono">收 227萬 · <span class="save">存 96萬</span></span></div>
+      <div class="row"><span class="yl mono">2024</span><div class="bar" style="width:82%"></div><span class="rowval mono">收 299萬 · <span class="save">存 180萬</span></span></div>
+      <div class="row"><span class="yl mono">2026</span><div class="bar" style="width:100%"></div><span class="rowval mono">收 362萬 · <span class="save">存 274萬</span></span></div>
+    </div>
+    <div class="legend"><span><span class="swatch" style="background:var(--gauge-bright)"></span>年度收入（相對長度）</span><span><span class="swatch" style="background:var(--jade)"></span>當年淨儲蓄</span></div>
+
+    <div class="cols" style="margin-top:30px;">
+      <div class="card">
+        <h3><span class="ic">◆</span> 隱形包租公</h3>
+        <p style="margin:0;color:var(--ink-soft);font-size:14px;">2021 年起同時出租 <b>龜山（新潤鉑麗）</b>與 <b>新莊（仙境傳說）</b>，加計土城物業。房租收入累計約 <span class="mono" style="color:var(--jade);font-weight:700">296 萬</span>，並懂得用房貸槓桿。</p>
+      </div>
+      <div class="card">
+        <h3><span class="ic">◆</span> 懂利率、會調度</h3>
+        <p style="margin:0;color:var(--ink-soft);font-size:14px;">台新、Richart、<b>定存</b>帳戶並用，記錄「利息收入」<span class="mono">45 萬</span>，出國前自己換匯。最近一筆：把 <span class="mono" style="color:var(--gauge-bright);font-weight:700">70 萬</span> 轉入定存。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="shead"><span class="snum">03</span><h2>熱情所在：油門與登機門</h2></div>
+    <p class="lead">賺得多也懂得花在體驗上——13 年裡，錢包最誠實的兩個出口是重機與旅行。</p>
+    <div class="cols">
+      <div class="card">
+        <h3><span class="ic">⛊</span> 重機癡（換車如換季）</h3>
+        <div class="fleet">
+          <span class="chip hi">Kawasaki Z1000</span>
+          <span class="chip">HONDA CB300R</span>
+          <span class="chip">YAMAHA FORCE155</span>
+          <span class="chip">Kymco K-XCT 300</span>
+          <span class="chip">光陽 Xciting</span>
+          <span class="chip">KTR</span>
+          <span class="chip">野狼</span>
+          <span class="chip">Fighter</span>
+        </div>
+        <p style="margin:14px 0 0;color:var(--ink-faint);font-size:13px;">還特地去考了大型重機駕照；另有 Toyota Altis 汽車代步。</p>
+      </div>
+      <div class="card">
+        <h3><span class="ic">✈</span> 亞洲深度旅人 · 重度日本控</h3>
+        <div class="destlist">
+          <div class="dest"><span class="dl">日本</span><div class="db" style="width:100%"></div><span class="dn mono">125</span></div>
+          <div class="dest"><span class="dl">沖繩</span><div class="db" style="width:17%"></div><span class="dn mono">20</span></div>
+          <div class="dest"><span class="dl">印度</span><div class="db" style="width:13%"></div><span class="dn mono">15</span></div>
+          <div class="dest"><span class="dl">中國</span><div class="db" style="width:9%"></div><span class="dn mono">11</span></div>
+          <div class="dest"><span class="dl">柬埔寨</span><div class="db" style="width:7%"></div><span class="dn mono">8</span></div>
+        </div>
+        <p style="margin:14px 0 0;color:var(--ink-faint);font-size:13px;">旅遊累計 87 萬；足跡含香港、新加坡、歐洲。（數字＝備註提及次數）</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="shead"><span class="snum">04</span><h2>性格與價值觀</h2></div>
+    <div class="vals">
+      <div class="val"><h3><span class="n">Ⅰ</span>極度自律</h3><p>連 70 元都記，一記 13 年 2,251 筆，把薪資排到 2027 年。財務素養近乎會計專業。</p></div>
+      <div class="val"><h3><span class="n">Ⅱ</span>顧家孝順</h3><p>2015 年起每年固定給「Mom 專款 6 萬」從不間斷，2021 年還出錢買新車給家人。</p></div>
+      <div class="val"><h3><span class="n">Ⅲ</span>理性務實</h3><p>高儲蓄、低炫耀；錢花在能長期持有的資產與真實體驗上，而非一次性的排場。</p></div>
+      <div class="val"><h3><span class="n">Ⅳ</span>作息規律</h3><p>記帳集中在午休 12 點與睡前 22–01 點（台北時間），用固定的日常空檔盤點收支。</p></div>
+      <div class="val"><h3><span class="n">Ⅴ</span>越挫越勇</h3><p>被資遣、失業也不慌——接案硬撐、逐級轉職翻身，還花八年討回被積欠的年終。</p></div>
+      <div class="val"><h3><span class="n">Ⅵ</span>探索精神</h3><p>不只去好走的地方——印度多次、柬埔寨、北京，敢往陌生與粗獷的路線走。</p></div>
+    </div>
+  </section>
+
+  <section style="border-bottom:none;">
+    <p class="eyebrow" style="margin-bottom:14px;">一句話定調</p>
+    <p class="pull">他把記帳當成<span class="hl">人生的自我管理儀表板</span>——用紀律換自由，用專業換籌碼，然後把賺到的餘裕，投進油門與世界地圖。</p>
+  </section>
+
+  <footer>
+    <div class="disc">資料來源：台灣賬本.plist（MacMoney 帳本，2013-01 至 2026-07，共 2,251 筆交易）。金額為累計概估、部分經四捨五入；職涯與性格為依交易備註與科目所做的推論，僅供參考。</div>
+  </footer>
+</div>
