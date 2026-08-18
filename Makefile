@@ -12,7 +12,7 @@ GIT_DESC    := $(shell git describe --tags --always --dirty 2>/dev/null)
 GIT_SUBJECT := $(shell git log -1 --pretty=%s 2>/dev/null)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup login convert preview test push release list-deploys clean
+.PHONY: help setup login convert preview condense update test push release list-deploys clean
 
 help: ## 顯示可用指令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -31,6 +31,15 @@ convert: ## 由 import_data/source.plist 產生 data/*.csv（含恆等式檢查�
 	$(PYTHON) tools/convert.py
 
 preview: convert ## 產生並開啟本機預覽（免部署）
+	$(NODE) tools/make_preview.js
+	@command -v open >/dev/null 2>&1 && open preview/index.html \
+		|| echo "→ 請用瀏覽器開啟 preview/index.html"
+
+condense: ## 就地濃縮 source.plist（自動備份 .bak；智慧預設：6 科目、往年逐年/當年逐月）
+	$(PYTHON) tools/condense.py --in-place
+
+update: condense ## 月更一鍵：就地濃縮 source.plist → 轉 CSV → 開啟本機預覽
+	$(PYTHON) tools/convert.py
 	$(NODE) tools/make_preview.js
 	@command -v open >/dev/null 2>&1 && open preview/index.html \
 		|| echo "→ 請用瀏覽器開啟 preview/index.html"

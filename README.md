@@ -99,28 +99,44 @@ python3 tools/reclassify.py            # source.plist → source.reclassified.pl
 > 完整性檢查：若交易或帳戶出現未列入 `REMAP` 的支出科目會直接中止。故**只能對「尚未重分類」的
 > 檔案執行一次**；對已是 14 科目的檔案再跑會因找不到舊科目而報錯。
 
-### 2. 濃縮 `tools/condense.py`（精簡歷史）
+### 2. 濃縮 `tools/condense.py`（精簡歷史 / 月更）
 
 把指定支出科目的瑣碎交易，依 (Account1, Account2, 期間) 分組加總成一筆，壓縮多年累積的細碎紀錄。
-借貸方向與金額總和皆保留，故各帳戶餘額與對應顆粒度的統計（年報／月趨勢）仍成立。兩種顆粒度：
+借貸方向與金額總和皆保留，故各帳戶餘額與對應顆粒度的統計（年報／月趨勢）仍成立。
+
+**月更用途（推薦，就地覆蓋）**：不帶任何參數即用智慧預設——來源 `source.plist`、經常性 6 科目、
+年份**依當年自動判斷**（往年逐年、當年逐月，跨年自動生效不用改參數）。搭配 `make update` 一鍵跑完：
 
 ```bash
-# 2026 前逐年濃縮、2026 逐月濃縮（本專案的最終狀態）
+make update      # = condense --in-place（就地濃縮，自動備份 .bak）→ convert → 開啟本機預覽
+make condense    # 只就地濃縮 source.plist（= python3 tools/condense.py --in-place）
+```
+
+> **每月流程（單一檔案沿用）**：在 App 記完當月 → 匯出覆蓋 `import_data/source.plist` → `make update`
+> （就地濃縮回 `source.plist`，並存 `source.plist.bak`）→ 用產生的 CSV 更新儀表板、或把濃縮後的
+> `source.plist` 重新匯入 App。`source.plist` 本身就是「歷史彙總 + 當月新明細」的累積檔——不是 raw。
+>
+> 反覆濃縮為何安全：分組保留借貸方向與金額，恆等式（A−L 與 I−E 兩邊）於**寫檔前**把關，不過即中止不覆寫；
+> 且既有彙總筆的「（N 筆）」計數會被**讀出累加**（非歸零），故金額與計數都不會因每月重複濃縮而失真。
+
+**自訂**（需要時仍可覆寫預設；不加 `--in-place` 則寫到 `--out`、不動來源）：
+
+```bash
 python3 tools/condense.py 固定週期費 保險 日常生活 交通移動 健康醫療 進修教育 \
     --yearly-before 2026 --monthly 2026 \
-    --src import_data/source.reclassified.plist \
-    --out import_data/source.condensed.plist
+    --src import_data/source.plist --out import_data/source.condensed.plist
 ```
 
 `--yearly-before N` = N 年（不含）以前每『年』併一筆；`--monthly Y …` = 指定年份每『月』併一筆；
-其餘交易原樣保留。彙總筆的 `Note1` 會標注「期間＋科目彙總（N 筆）」方便辨識。
+其餘交易原樣保留。彙總筆日期一律落在**期間第一天**（月→1 號、年→1/1），`Note1` 標注「期間＋科目彙總（N 筆）」。
+預設科目刻意只收斂高頻瑣碎的 6 類；旅遊、耐久大額、交通工具、房屋支出等「單筆有意義」者保留不併。
 
 ### 3. 接回 `convert.py`
 
-前處理後的 plist 不是預設來源，需以參數指到它（或自行覆蓋 `source.plist`，建議先備份）：
+`make update` 已自動接 `convert.py`。若手動對某個 plist 產 CSV：
 
 ```bash
-python3 tools/convert.py import_data/source.condensed.plist   # → data/*.csv
+python3 tools/convert.py import_data/source.plist   # 省略參數則預設即 source.plist
 ```
 
 ## 使用步驟
@@ -132,6 +148,8 @@ make            # 列出所有指令
 make setup      # 檢查 python3/node、安裝 clasp
 make login      # clasp 登入（開瀏覽器授權）
 make convert    # source.plist → data/*.csv（含恆等式檢查）
+make condense   # 就地濃縮 source.plist（自動備份 .bak；智慧預設：6 科目、往年逐年/當年逐月）
+make update     # 月更一鍵：就地濃縮 source.plist → 轉 CSV → 開啟本機預覽
 make preview    # 產生並開啟本機預覽（免部署）
 make test       # 執行單元測試
 make push       # 上傳 src/ 到 Apps Script
