@@ -1,0 +1,13 @@
+<script>
+// View（十年行動計畫）：靜態策略報告頁，與 FIRE 報告同構。
+//   內容為手寫行動清單（非帳本計算），故不設 Model／ViewModel 層，也無 render/reload——
+//   報告 HTML 已直接寫在 index.html 的 <section id="view-plan10">，這裡只向核心註冊，
+//   讓分頁切換能連帶顯示/隱藏此頁（配色由 View_Styles 的 .report 區塊處理）。
+//   匯出 Markdown 用共用工具 App.View.bindReportExport（見 View_Report_Export）。
+(function () {
+  function wire() {
+    App.View.bindReportExport('plan10ExportBtn', 'view-plan10', '十年行動計畫-2026-2036.md');
+  }
+  App.View.registerPage({ name: 'plan10', wire: wire });
+})();
+</script>

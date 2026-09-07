@@ -47,13 +47,14 @@
         <button class="tab" data-view="yearly">📊 年度收支</button>
         <button class="tab" data-view="income">💰 收入來源</button>
         <button class="tab" data-view="expense">💸 支出結構</button>
-        <!-- 報告：3 份靜態分析收進下拉，主排只留常看的即時儀表板 -->
+        <!-- 報告：4 份靜態分析收進下拉，主排只留常看的即時儀表板 -->
         <div class="tab-menu" id="reportMenu">
           <button class="tab tab-trigger" id="reportMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="reportMenuPanel">📄 報告 <span class="caret">▾</span></button>
           <div class="tab-dropdown hidden" id="reportMenuPanel" role="menu">
             <button class="menu-item" type="button" role="menuitem" data-view="realty">🏘️ 房產報酬</button>
             <button class="menu-item" type="button" role="menuitem" data-view="ctiming">⏳ C房賣點</button>
             <button class="menu-item" type="button" role="menuitem" data-view="fire">🏡 FIRE 規劃</button>
+            <button class="menu-item" type="button" role="menuitem" data-view="plan10">🎯 十年計畫</button>
           </div>
         </div>
       </div>
@@ -178,6 +179,11 @@
       <section id="view-fire" class="report hidden">
         <?!= include('view/View_Fire_Report') ?>
       </section>
+
+      <!-- 十年行動計畫（靜態報告，獨立於 FIRE 報告：只談 2026~2036 的執行） -->
+      <section id="view-plan10" class="report hidden">
+        <?!= include('view/View_Plan10_Report') ?>
+      </section>
     </div>
     <div id="error" class="hidden"></div>
   </div>
@@ -216,6 +222,7 @@
   <?!= include('view/View_Realty') ?>
   <?!= include('view/View_CTiming') ?>
   <?!= include('view/View_Fire') ?>
+  <?!= include('view/View_Plan10') ?>
 
   <script>App.View.boot();</script>
 </body>
