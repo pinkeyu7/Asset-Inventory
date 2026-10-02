@@ -1,12 +1,12 @@
 <script>
-// View（FIRE 退休戰略）：靜態策略報告頁。
+// View（五年財務展望，原 FIRE 退休戰略）：靜態策略報告頁。
 //   內容為手寫策略論述（非帳本計算），故不設 Model／ViewModel 層，也無 render/reload——
 //   報告 HTML 已直接寫在 index.html 的 <section id="view-fire">，這裡只向核心註冊，
 //   讓分頁切換能連帶顯示/隱藏此頁（配色由 View_Styles 的 .report 區塊處理）。
 //   匯出 Markdown 用共用工具 App.View.bindReportExport（見 View_Report_Export）。
 (function () {
   function wire() {
-    App.View.bindReportExport('fireExportBtn', 'view-fire', 'FIRE-退休戰略報告.md');
+    App.View.bindReportExport('fireExportBtn', 'view-fire', '五年財務展望.md');
   }
   App.View.registerPage({ name: 'fire', wire: wire });
 })();
