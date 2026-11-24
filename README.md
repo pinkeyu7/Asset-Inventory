@@ -239,6 +239,7 @@ make test            # = node --test（執行 tests/ledger.test.js）
 | `tools/condense.py` | 月更：瑣碎交易依 (科目×期間) 濃縮，plist→plist（`make condense` 就地覆蓋並備份 `.bak`），含恆等式驗證 |
 | `tools/convert.py` | plist → CSV，含恆等式驗證 |
 | `tools/make_preview.js` | 產生本機預覽 `preview/index.html` |
+| `tools/fire_model.py` | 〈五年財務展望〉報告的逐月推演模型：假設寫在檔頭常數，執行後印出報告各章數字 |
 | `data/*.csv` | 匯入 Google Sheet 用的資料 |
 | `src/Ledger.gs` | 借貸引擎：各月餘額、月度/年度收支、`verifyIdentity` 恆等式驗證（伺服器端純函式） |
 | `tests/ledger.test.js` | `Ledger.gs` 單元測試（`node --test`） |
