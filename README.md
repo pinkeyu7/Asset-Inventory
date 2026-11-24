@@ -3,7 +3,7 @@
 把記帳 App 匯出的複式記帳資料，變成一個可視化的個人財務網站（站名 **The Ledger**）。導覽採**兩層分頁**，收在固定於頁面頂端的 header，分三群：
 
 - **財富儀表板**（第一群）—— 六個由帳本資料驅動的畫面：**淨值趨勢、資產組成佔比、月度收支、年度收支總結、收入來源分析、支出結構**（收入／支出含各項目年度比較，固定配色）。
-- **個人報告**（第二群）—— 三頁靜態的**分析報告**（不動產投資報酬率、C 房賣出時機、FIRE 退休戰略；手寫論述、不接帳本計算，支援一鍵匯出 Markdown）。
+- **個人報告**（第二群）—— 三頁靜態的**分析報告**（不動產投資報酬率、C 房交屋即賣與貸款方案、FIRE 退休戰略；手寫論述、不接帳本計算，支援一鍵匯出 Markdown）。
 - **人物畫像**（第三群・單頁）—— 一頁由帳本反推的敘事式人物側寫（暖金雜誌風，自帶 scope 在 `.portrait` 下的樣式）。單頁群組不設二級列，點一級即直接進頁。
 
 以 Google Apps Script（Google Sheet 當資料庫、`HtmlService` 出網頁）打造，零伺服器成本。
@@ -48,7 +48,7 @@ src/view/        Core_View + View_* + View_Styles
 **頁面註冊**：每個 `View_XXX` 以 `App.View.registerPage({name, render, wire, beforeInit, reload})` 向核心註冊；
 核心負責分頁切換、初次/重載時依序呼叫各頁 hook。新增一頁＝三層各加一個 `*_XXX.html` 檔並註冊，不必改核心。
 
-**靜態頁例外（報告類）**：不動產投資報酬率、C 房賣出時機、FIRE 退休戰略這三頁是純論述、不接帳本計算，
+**靜態頁例外（報告類）**：不動產投資報酬率、C 房交屋即賣與貸款方案、FIRE 退休戰略這三頁是純論述、不接帳本計算，
 不需要 Model/ViewModel，也沒有 render/wire——各以一個薄註冊檔（`view/View_{Realty,CTiming,Fire}.html`）
 呼叫 `registerPage({name})` 納入分頁切換，並綁定「匯出 Markdown」按鈕（共用 `view/View_Report_Export.html` 的 DOM→Markdown 轉換）。
 報告內容是純 markup 片段（`view/View_*_Report.html`），由 `index.html` 對應的 `<section class="report">` 以 `include()` 組入；
@@ -248,7 +248,7 @@ make test            # = node --test（執行 tests/ledger.test.js）
 | `src/model/Importer.html` | Model：解析 plist → 列陣列（與 `convert.py` 同結果） |
 | `src/viewmodel/Core_ViewModel.html` · `src/viewmodel/ViewModel_*.html` | ViewModel 核心（observable/init）+ 各頁狀態命令 |
 | `src/view/Core_View.html` · `src/view/View_*.html` | View 核心（工具/分頁/上傳/密碼/啟動）+ 各頁 render/wire |
-| `src/view/View_{Realty,CTiming,Fire}.html` · `..._Report.html` | 三頁靜態報告（不動產報酬／C 房賣點／FIRE）：前者註冊分頁並綁匯出鈕，後者為報告內容（純 markup） |
+| `src/view/View_{Realty,CTiming,Fire}.html` · `..._Report.html` | 三頁靜態報告（不動產報酬／C 房賣出／FIRE）：前者註冊分頁並綁匯出鈕，後者為報告內容（純 markup） |
 | `src/view/View_Portrait.html` · `View_Portrait_Report.html` | 人物畫像（單頁群組）：前者註冊分頁，後者為內容＋scope 在 `.portrait` 下的專屬樣式（由 `personal.html` 改寫） |
 | `src/view/View_Report_Export.html` | 報告頁共用的 DOM→Markdown 匯出器（`App.View.bindReportExport`） |
 | `src/view/View_Styles.html` | 樣式（CSS，含報告頁共用的 `.report` 配色） |

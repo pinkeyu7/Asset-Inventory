@@ -1,19 +1,20 @@
-<!-- C 房賣出時機分析報告（靜態內容）：由 index.html 的 <section id="view-ctiming"> 以 include 組入。
+<!-- C 房交屋即賣＋貸款方案報告（靜態內容）：由 index.html 的 <section id="view-ctiming"> 以 include 組入。
      手寫分析、非帳本計算；配色樣式共用 View_Styles 的 .report 區塊。
-     與 FIRE 報告的 C 房參數一致（市值 2,100／取得 1,812／貸款 1,268／月付 5.15 萬／仲介費 50 萬）。
-     核心視角：房貸「利息」才是持有的真實成本，本金屬強迫儲蓄、賣出時會拿回。 -->
+     C 房參數：市值 2,100／取得成本 1,812／自有出資 544／貸款 1,268（2a 2.6% 綁約 3 年、2b 3.0% 不綁約）／
+     仲介費 50／代書雜費 6／交屋雜費 25（2026/05 已付，其中 10 列入取得成本）／家人借款利息 22（Martin 2、Mom 20）；
+     基準情境為 2027/3 賣出、2b 貸款。 -->
 <div class="header-banner">
   <!-- 匯出 Markdown：與其他報告共用 App.View.bindReportExport；data-md-skip 使其不納入轉換。 -->
   <button id="cTimingExportBtn" class="report-export-btn" type="button" data-md-skip>⬇️ 匯出 Markdown</button>
-  <h1>⏳ C 房屋・賣出時機影響分析</h1>
-  <p class="meta-info"><strong>標的：</strong> C 房屋（預售屋交屋後，非自住、預計出脫）</p>
-  <p class="meta-info"><strong>決策問題：</strong> 為了省房地合一稅而「晚點賣」，扛得住每月房貸利息嗎？</p>
-  <p class="meta-info"><strong>分析基準日：</strong> 2026-10（C 房 12 月交屋前）</p>
-  <p class="verdict">結論：交屋後<strong>儘速賣出</strong>——為省稅多扛的房貸<strong>利息</strong>，遠大於省下的稅</p>
+  <h1>🏁 C 房屋・交屋即賣＋貸款方案選擇</h1>
+  <p class="meta-info"><strong>標的：</strong> C 房屋（預售屋，2026/12 交屋；非自住、確定出脫）</p>
+  <p class="meta-info"><strong>決策：</strong> ① 交屋後儘速賣出 ② 交屋貸款選 <strong>2b</strong>（3%、不綁約、搭配美元儲蓄險） ③ 掛售底線 1,967 萬（以 2027/3 成交計）</p>
+  <p class="meta-info"><strong>分析基準日：</strong> 2026-11-24</p>
+  <p class="verdict">結論：<strong>交屋即掛售、貸款簽 2b。</strong> 賣出時機已定案，貸款的唯一考量是「幾個月內就要清償，哪一案出場成本低」——2b 比 2a 省約 <strong>20 到 24 萬</strong>，且賣出拖到兩年內都不翻盤。價格上，2027/3 成交的保本價約 <strong>1,967 萬</strong>，每晚一個月上升約 6 萬。</p>
 </div>
 
-<h2>🎯 一、問題背景與 C 房基本資料</h2>
-<p>C 房因女友不擬入住、已無自住價值，確定要出脫。唯一的變數是<strong>「賣出時機」</strong>：房地合一稅率會隨持有期拉長而下降（45% → 20% → 15%），直覺上「多等幾年、少繳點稅」似乎划算。但每多持有一個月，就多繳一個月房貸——<strong>其中的利息是拿不回來的真實成本</strong>。本報告就用這筆利息帳來檢驗。</p>
+<h2>🎯 一、背景與基本資料</h2>
+<p>C 房因女友不擬入住、已無自住價值，確定要出脫；前一版報告已確認「為省房地合一稅而多持有」不划算（摘要見第二節）。本版聚焦三件事：<strong>交屋貸款怎麼選</strong>、<strong>賣出後拿回多少</strong>、<strong>賣多少才不賠</strong>。</p>
 <div class="table-wrap">
 <table>
   <thead>
@@ -22,221 +23,346 @@
   <tbody>
     <tr><td>目前市值</td><td>2,100</td><td>交屋當下</td></tr>
     <tr><td>取得成本</td><td>1,812</td><td>房地合一課稅基礎</td></tr>
-    <tr><td class="bold">帳面增值</td><td class="bold">288</td><td>2,100 − 1,812</td></tr>
-    <tr><td>貸款餘額</td><td>1,268</td><td>剛交屋</td></tr>
-    <tr><td>房貸月付</td><td>5.15（＝51,500 元）</td><td>30 年、年利率 2.7%（無寬限期）</td></tr>
+    <tr><td>帳面增值</td><td>288</td><td>2,100 − 1,812</td></tr>
+    <tr><td>自有出資</td><td>544</td><td>自備款＋工程款，分 7 期投入（見第五節）</td></tr>
+    <tr><td>貸款金額</td><td>1,268</td><td>30 年本息攤還、無寬限期</td></tr>
+    <tr><td>月付（2a / 2b）</td><td>5.08 / 5.35</td><td>年利率 2.6% / 3.0%</td></tr>
+    <tr><td>預估房地合一稅</td><td>約 103</td><td>45% 稅率；扣仲介費 50 萬與交屋雜費中列入取得成本的 10 萬</td></tr>
+    <tr><td>仲介費 / 代書雜費</td><td>50 / 6</td><td>賣出時支付；仲介費已列入扣除，代書雜費保守未列</td></tr>
+    <tr><td>交屋雜費</td><td>25</td><td>2026/05 已付。含契稅、印花稅、代書費、規費、預繳管理費。預設其中 10 萬（契稅、印花稅、代書費、規費）列入取得成本，其餘 15 萬不可抵扣；實際金額待地政士核算</td></tr>
+    <tr><td>家人借款</td><td>Martin 100／Mom 130</td><td>支應部分自有出資：Martin 2025/09、Mom 2026/01。Mom 已還 20 萬，餘 110 萬交屋後償還；本報告視同自有資金，本金償還不計入純益</td></tr>
+    <tr><td>家人借款利息</td><td>22</td><td>Martin 2 萬（2026/11 已付）＋Mom 20 萬（交屋後支付）。不可抵扣房地合一稅</td></tr>
   </tbody>
 </table>
 </div>
 
-<h2>⚖️ 二、核心試算：省稅 vs 燒利息</h2>
-<p>拉長持有期能降房地合一稅率（省稅），但每多持有一個月就多繳一個月房貸利息。把兩者對撞就見真章——<strong>全程只用稅額與利息、不需任何投資報酬假設</strong>。</p>
+<h2>✂️ 二、為什麼交屋即賣（已定案，僅列理由）</h2>
+<ul>
+  <li><strong>持有只有成本、沒有收益。</strong> 非自住又不出租，每月約 <strong>3.2 萬利息</strong>（2b 第一個月）純燒掉，另加管理費、地價稅與非自住稅率的房屋稅。</li>
+  <li><strong>稅率階梯省不了多少。</strong> 從 45% 等到 20% 要 5 年，以現在的增值計只省約 57 萬（課稅所得 228 萬 × 25%），遠不及期間利息（以 2b 的 3% 計約 180 萬）。</li>
+  <li><strong>什麼情況會翻盤：</strong> 每年利息約 38 萬，相當於市值的 1.8%。只有在預期 C 房年漲幅持續高於這個水準時，持有才可能勝過即賣。在信用管制環境下不押這個注。</li>
+</ul>
 
-<h3>1. 稅率隨持有期遞減（省稅的天花板）</h3>
-<p>個人非自住房地，稅率依<strong>持有期間</strong>（自交屋取得所有權起算）分級。就本案 288 萬增值估算：</p>
+<h2>⚖️ 三、貸款方案比較</h2>
+
+<h3>1. 兩案條件</h3>
 <div class="table-wrap">
 <table>
   <thead>
-    <tr><th>持有期間（成屋）</th><th>稅率</th><th>估算稅額</th><th>相對「交屋即賣」省稅</th></tr>
+    <tr><th></th><th>2a</th><th>2b</th></tr>
   </thead>
   <tbody>
-    <tr><td>2 年以內</td><td class="neg">45%</td><td>約 107 萬</td><td>—</td></tr>
-    <tr><td>超過 2 年～5 年</td><td>35%</td><td>約 97 萬</td><td>+11 萬</td></tr>
-    <tr><td>超過 5 年～10 年</td><td>20%</td><td>約 67 萬</td><td>+40 萬</td></tr>
-    <tr><td>超過 10 年</td><td>15%</td><td>約 65 萬</td><td>+42 萬</td></tr>
+    <tr><td>金額 / 年期</td><td>1,268 萬 / 30 年</td><td>1,268 萬 / 30 年</td></tr>
+    <tr><td>年利率</td><td>2.6%</td><td>3.0%</td></tr>
+    <tr><td>月付</td><td>50,763 元</td><td>53,459 元</td></tr>
+    <tr><td>綁約</td><td>3 年</td><td>無</td></tr>
+    <tr><td>提前清償違約金</td><td class="neg">清償餘額 × 2%，逐年遞減</td><td>無</td></tr>
+    <tr><td>附帶條件</td><td>無</td><td>美元儲蓄險：每年 3,000 美元、繳 6 年</td></tr>
   </tbody>
 </table>
 </div>
-<div class="note">📎 <strong>省稅的天花板很低：</strong> 就算從 45% 一路等到 20%，也只省約 <strong>40 萬</strong>；等到 15% 也才 42 萬。這就是「多持有」能換到的全部好處——接下來看它的代價。（另有「自住滿 6 年」可享免稅額 400 萬＋10% 的特例，見第三節。）</div>
 
-<h3>2. 每月房貸拆解：利息是成本，本金會拿回</h3>
-<p>5.15 萬的月付裡，一部分是<strong>利息</strong>（付給銀行、拿不回來），一部分是<strong>本金</strong>（還自己的債，賣出時透過「較低貸餘 → 較高淨入袋」原封拿回）。所以衡量「持有成本」時，<strong>只有利息算數</strong>。而房貸前期利息最重：</p>
+<h3>2. 成本結構</h3>
+<ul>
+  <li><strong>利差很小：</strong> 兩案差 0.4%，一年約 <strong>5.1 萬</strong>、一個月約 <strong>0.42 萬</strong>。</li>
+  <li><strong>違約金很大：</strong> 第一年內清償，2a 要付約 <strong>25 萬</strong>（2% × 約 1,250 萬餘額）。「逐年遞減」對一年內賣出沒有幫助。</li>
+  <li><strong>儲蓄險本金不算成本：</strong> 這筆錢本來就要存，本金約 58 萬（18,000 美元）不是費用；它的成本只有「報酬比其他存法差多少」（見第四節），對貸款決策不構成影響。</li>
+</ul>
+
+<h3>3. 總成本試算（交屋後 m 個月賣出）</h3>
+<p>違約金以清償時餘額計。第一年 2% 為合約條件；第二、三年以 1.5% / 1% 假設，實際比率請以合約為準。</p>
 <div class="table-wrap">
 <table>
   <thead>
-    <tr><th>持有期間</th><th>累計利息（真實成本・燒掉）</th><th>累計本金（賣時拿回）</th><th>期末貸款餘額</th></tr>
+    <tr><th>賣出時點</th><th>違約金率</th><th>2a 利息</th><th>2a 違約金</th><th>2a 合計</th><th>2b 利息</th><th>2b 省下</th></tr>
   </thead>
   <tbody>
-    <tr><td>持有 2 年</td><td class="neg">67 萬</td><td>57 萬</td><td>1,211 萬</td></tr>
-    <tr><td>持有 5 年</td><td class="neg">162 萬</td><td>147 萬</td><td>1,121 萬</td></tr>
-    <tr><td>持有 10 年</td><td class="neg">302 萬</td><td>316 萬</td><td>952 萬</td></tr>
+    <tr><td>3 個月</td><td>2%</td><td>8.2</td><td>25.2</td><td>33.4</td><td>9.5</td><td><strong>+24.0</strong></td></tr>
+    <tr><td>6 個月</td><td>2%</td><td>16.4</td><td>25.1</td><td>41.5</td><td>18.9</td><td><strong>+22.5</strong></td></tr>
+    <tr><td>9 個月</td><td>2%</td><td>24.5</td><td>24.9</td><td>49.5</td><td>28.3</td><td><strong>+21.1</strong></td></tr>
+    <tr><td>12 個月</td><td>2%</td><td>32.6</td><td>24.8</td><td>57.4</td><td>37.7</td><td><strong>+19.7</strong></td></tr>
+    <tr><td>18 個月</td><td>1.5%（假設）</td><td>48.7</td><td>18.4</td><td>67.1</td><td>56.2</td><td>+10.8</td></tr>
+    <tr><td>24 個月</td><td>1.5%（假設）</td><td>64.5</td><td>18.2</td><td>82.7</td><td>74.6</td><td>+8.1</td></tr>
+    <tr><td>30 個月</td><td>1%（假設）</td><td>80.2</td><td>12.0</td><td>92.1</td><td>92.7</td><td class="neg">−0.5</td></tr>
+    <tr><td>36 個月</td><td>1%（假設）</td><td>95.6</td><td>11.8</td><td>107.5</td><td>110.6</td><td class="neg">−3.1</td></tr>
   </tbody>
 </table>
 </div>
-<div class="note">前幾年利息約占月付一半以上：<strong>第 1 年利息 33.9 萬（月均約 2.82 萬）</strong>、本金僅 27.9 萬。也就是說，交屋後空置持有的頭幾年，每月大約有 <strong>2.8 萬是純粹丟進水裡</strong>。</div>
-
-<h3>3. 純現金帳：為省稅而多持有，反而虧</h3>
-<p>把「省下的稅」和「多燒的利息」直接對撞——<strong>這一節完全不用任何報酬率假設，只有利息 vs 稅</strong>：</p>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>相對「交屋即賣」多持有</th><th>省下的稅</th><th>多燒的利息</th><th>淨結果</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>多持有 2 年</td><td>+11 萬</td><td class="neg">−67 萬</td><td class="neg bold">−56 萬</td></tr>
-    <tr><td>多持有 5 年</td><td>+40 萬</td><td class="neg">−162 萬</td><td class="neg bold">−122 萬</td></tr>
-    <tr><td>多持有 10 年</td><td>+42 萬</td><td class="neg">−302 萬</td><td class="neg bold">−260 萬</td></tr>
-  </tbody>
-</table>
-</div>
-<h3>4. 早賣還同時關掉 B 房的利息水龍頭</h3>
-<p>賣掉 C 的淨入袋在整體規劃（FIRE 方案三）裡<strong>不是拿去投資 0050，而是回填 B 屋房貸</strong>。因此「投入 0050 賺 8%」這類報酬假設在本案並不成立，本報告不採用；早賣的真正效益，一樣回到「利息」上看。</p>
-<div class="callout">
-  <div class="bold">🔑 早賣 C = 同時關掉兩個利息水龍頭</div>
-  <p>拖著不賣 C，你會<strong>雙重付息</strong>：一邊繼續繳 C 的房貸利息（前期每月約 2.8 萬），一邊因為賣款還沒回填 B 貸、<strong>B 的利息也持續累積</strong>（B 貸 870 萬 @ 年利率 2.52%，每月利息約 <strong>1.8 萬</strong>）。早點賣 C、把錢回填 B，等於一次關掉兩個利息水龍頭——C 約 2.8 萬 ＋ B 約 1.8 萬，<strong>合計每月約 4.6 萬利息</strong>止血；這個效益<strong>不需要任何投資報酬假設</strong>就成立。</p>
-</div>
-
+<div class="note">就算把儲蓄險的報酬差距以 5 萬計入，一年內賣出 2b 仍省 15 到 19 萬，兩年內仍省 3 到 6 萬。</div>
 <div class="conclusion">
-  <div class="bold">✅ 光看利息就結案</div>
-  <p>每晚賣一年，房貸利息燒掉的錢就遠超過稅率階梯能省的。等到滿 5 年把稅降到 20%，帳面已經先淨虧約 <strong>122 萬</strong>——更別說 C 沒賣、B 貸也遲遲回填不了，形同每月同時燒 C＋B 兩份利息（見上方第 4 點）。<strong>省稅是省小錢，扛利息是花大錢。</strong></p>
+  <div class="bold">✅ 結論：簽 2b</div>
+  <p>一年內賣出省 20 到 24 萬，拖到兩年內仍省 8 到 11 萬，要到第三年才接近打平。超過綁約期後才是 2a 便宜，但那與「交屋即賣」的計畫無關。</p>
 </div>
 
-<h2>🏠 三、特例：自住滿 6 年的免稅優惠</h2>
-<p>《所得稅法》自用住宅優惠：<strong>本人（或配偶、未成年子女）設籍並實際居住連續滿 6 年、期間未出租或營業、且 6 年內未曾使用過本優惠</strong>，課稅所得 400 萬以內<strong>免稅</strong>、超過部分僅 10%。</p>
-<p>C 房增值扣費用後課稅所得約 <strong>354 萬 &lt; 400 萬</strong> → <strong>完全免稅</strong>。淨入袋約 <strong>1,071 萬</strong>（含 6 年間已還本金），比同期非自住（20% 稅）省約 71 萬、比交屋即賣（45%）省約 107 萬稅。</p>
-<div class="callout">
-  <div class="bold">但「免稅」仍然贏不了「早賣」——兩個理由</div>
-  <ul>
-    <li><strong>利息全自己扛：</strong> 自住就是自己住、自己繳貸，那 6 年約 <strong>191 萬利息</strong>全由自己承擔。就算稅全免（省 107 萬），純現金仍淨虧約 <strong>84 萬</strong>（191 − 107）。</li>
-    <li><strong>延後回填 B 貸：</strong> 自住 6 年＝賣款 6 年後才到手，B 房貸也就晚 6 年才被回填、<strong>多繳 6 年 B 的利息</strong>（見第二節第 4 點）。</li>
-  </ul>
-</div>
-<div class="alert-callout">
-  <div class="bold">⚠️ 而且這一格與現實直接矛盾</div>
-  <p>要拿這免稅，得<strong>你本人搬進 C、設籍、住滿 6 年、且不出租</strong>。但 C 的問題正是<strong>女友不擬入住</strong>；為了省一筆比利息還小的稅而去住 C 六年，<strong>財務與人生兩面都不划算</strong>——除非哪天你們真的決定把 C 當自住家，那才是另一個故事。</p>
-</div>
-
-<h2>💹 四、C 房這筆投資的實際投報率（IRR）</h2>
-<p>前三節都在回答「<strong>該不該早賣</strong>」；這一節換個角度，回答「<strong>這筆房產投資到頭來賺了多少</strong>」。計算<strong>只用真實金流</strong>——你分期投入的自備款與工程款、賣出的淨入袋、稅與利息，<strong>不含任何股市報酬假設</strong>，與本報告一貫立場一致。情境設為報告推薦的「交屋後儘速賣」，以 <strong>2027/1 賣出</strong>為例。</p>
-
-<h3>1. 你的實際出資（自備款＋工程款）</h3>
-<p>C 房自備部分於預售期分期投入，合計 <strong>544 萬</strong>（＝取得成本 1,812 − 貸款 1,268），其餘由房貸支應：</p>
+<h2>💰 四、儲蓄險的處理</h2>
+<p><strong>條件：</strong> 每年繳 3,000 美元、繳 6 年共 18,000 美元，到期領回 18,017 美元，年化報酬約 <strong>0.03%</strong>，等於零利率的美元定期儲蓄。</p>
+<p><strong>定位：</strong> 當成原本就要做的 6 年定期儲蓄，本金不計入貸款成本。真正的成本是它與你原本存法之間的報酬差距：</p>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>投入時點</th><th>金額（萬）</th></tr></thead>
+  <thead>
+    <tr><th>原本會怎麼存這筆錢</th><th>6 年少賺（萬台幣，匯率 32）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>活存或現金，報酬接近 0%</td><td>0</td></tr>
+    <tr><td>台幣定存，約 1.6%</td><td>3.3</td></tr>
+    <tr><td>美元定存，約 3.5%</td><td>7.5</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>兩個不算成本但要知道的事：</strong></p>
+<ul>
+  <li><strong>流動性：</strong> 約 58 萬鎖 6 年，前兩年解約會賠本。</li>
+  <li><strong>匯率：</strong> 到期領回 18,017 美元約 58 萬台幣，匯率每動 5% 約 ±2.9 萬。</li>
+</ul>
+<p><strong>房子賣掉之後的選擇：</strong> 屆時只繳了第一年 3,000 美元。可以解約（第一年解約金率若為六到七成五，損失約 2.4 到 3.8 萬）或繳滿（以台幣定存為比較基準，機會成本約 3.3 萬）。兩者差不到 2 萬，到時依解約金表、匯率與現金需求決定即可。</p>
+
+<h2>💹 五、賣出淨額與投報率（IRR）</h2>
+
+<h3>1. 自有出資（自備款＋工程款）</h3>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>投入時點</th><th>金額（萬）</th></tr>
+  </thead>
   <tbody>
     <tr><td>2023/10</td><td>182</td></tr>
     <tr><td>2024/12</td><td>36</td></tr>
     <tr><td>2025/04</td><td>35</td></tr>
     <tr><td>2025/09</td><td>36</td></tr>
     <tr><td>2025/12</td><td>37</td></tr>
-    <tr><td>2026/01</td><td>181</td></tr>
     <tr><td>2026/08</td><td>37</td></tr>
-    <tr class="total-row"><td>合計自有出資</td><td>544</td></tr>
+    <tr><td>2026/11</td><td>181</td></tr>
+    <tr class="total-row"><td>合計</td><td>544</td></tr>
   </tbody>
 </table>
 </div>
 
-<h3>2. 賣出淨入袋：拆成「收回本金」與「純益」</h3>
-<p>賣出淨入袋沿用第一～二節的 C 房參數：2,100 萬成交、清償房貸 1,268 萬、扣除仲介 50 萬、代書雜費 6 萬與 45% 房地合一稅約 107 萬後，淨入袋約 <strong>669 萬</strong>——其中 <strong>544 萬</strong>是拿回先前投入的本金，<strong>125 萬</strong>才是真實獲利。</p>
+<h3>2. 房地合一稅計算</h3>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>項目</th><th>金額（萬）</th></tr></thead>
+  <thead>
+    <tr><th>項目</th><th>金額（萬）</th><th>說明</th></tr>
+  </thead>
   <tbody>
-    <tr><td>賣出淨入袋</td><td class="bold">≈ 669</td></tr>
-    <tr><td>其中：收回本金（＝自有出資）</td><td>544</td></tr>
-    <tr class="profit-row"><td>賣房純益（扣稅費後真實獲利）</td><td class="bold">≈ 125</td></tr>
+    <tr><td>成交價</td><td>2,100</td><td>以目前市值計</td></tr>
+    <tr><td>− 取得成本</td><td>1,812</td><td>預售買價</td></tr>
+    <tr><td>− 取得時費用</td><td>10</td><td>交屋雜費中的契稅、印花稅、代書費、規費（預設值，待地政士核算）</td></tr>
+    <tr><td>− 移轉費用</td><td>50</td><td>仲介費，有憑證以實額扣除</td></tr>
+    <tr><td class="bold">＝ 課稅所得</td><td class="bold">228</td><td></td></tr>
+    <tr><td>× 稅率</td><td class="neg">45%</td><td>個人非自住、持有 2 年以內</td></tr>
+    <tr class="total-row"><td>＝ 房地合一稅</td><td>102.6</td><td></td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">📎 <strong>未列入扣除的項目：</strong> 代書雜費 6 萬（可列為移轉費用，保守未列）、土地漲價總數額（待地政士試算）。預繳管理費與家人借款利息不屬可扣除項目。費用若無憑證只能按成交價 3% 推計、上限 30 萬，所以仲介費的發票要留好。</div>
+
+<h3>3. 賣出淨額拆解（基準情境：2027/3 賣出，2b 貸款）</h3>
+<p>2027/1 緊接農曆年，預期不會那麼快成交，故以交屋後 3 個月、繳 3 期月付的 2027/3 為基準。</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>項目</th><th>金額（萬）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>成交價</td><td>2,100</td></tr>
+    <tr><td>− 清償房貸餘額</td><td class="neg">1,261.5</td></tr>
+    <tr><td>− 仲介費</td><td class="neg">50</td></tr>
+    <tr><td>− 代書雜費</td><td class="neg">6</td></tr>
+    <tr><td>− 房地合一稅（45%，見上一小節）</td><td class="neg">102.6</td></tr>
+    <tr class="total-row"><td>賣出淨額（賣出當下進帳）</td><td>≈ 680</td></tr>
+    <tr><td>− 交屋雜費（2026/05 已付；其中 10 萬已在稅額中抵扣）</td><td class="neg">25</td></tr>
+    <tr><td>− 家人借款利息（Martin 2 已付、Mom 20 交屋後付；不可抵稅）</td><td class="neg">22</td></tr>
+    <tr class="total-row"><td>整筆投資淨回收</td><td>≈ 633</td></tr>
+    <tr><td>其中：收回本金（自有出資）</td><td>544</td></tr>
+    <tr><td>已繳月付（3 期）</td><td>16.0</td></tr>
+    <tr class="profit-row"><td>純益</td><td>≈ 73</td></tr>
   </tbody>
 </table>
 </div>
 
-<h3>3. 投報率：整段報酬與年化 IRR</h3>
+<h3>4. 年化 IRR 隨賣出月份下降</h3>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>指標</th><th>數值</th><th>算法</th></tr></thead>
+  <thead>
+    <tr><th>賣出月份</th><th>貸款餘額</th><th>賣出淨額</th><th>淨回收</th><th>已繳月付</th><th>純益</th><th>年化 IRR</th></tr>
+  </thead>
   <tbody>
-    <tr><td>純益率（整段約 3.25 年）</td><td class="bold">≈ +23.0%</td><td>純益 125 ÷ 自有出資 544</td></tr>
-    <tr><td>年化 IRR（資金加權）</td><td class="bold">≈ 11.4%</td><td>把 7 筆分期投入的時點都算進去（XIRR）</td></tr>
+    <tr><td>2027/1</td><td>1,265.8</td><td>675.6</td><td>628.6</td><td>5.3</td><td>79.2</td><td>8.4%</td></tr>
+    <tr><td><strong>2027/3（基準）</strong></td><td>1,261.5</td><td>679.9</td><td>632.9</td><td>16.0</td><td>72.9</td><td><strong>7.0%</strong></td></tr>
+    <tr><td>2027/6</td><td>1,254.9</td><td>686.5</td><td>639.5</td><td>32.1</td><td>63.5</td><td>5.3%</td></tr>
+    <tr><td>2027/12</td><td>1,241.5</td><td>699.9</td><td>652.9</td><td>64.2</td><td>44.7</td><td>3.0%</td></tr>
+  </tbody>
+</table>
+</div>
+<p>淨回收 ＝ 賣出淨額 − 交屋雜費 25 − 家人借款利息 22。純益率（2027/3）＝ 73 ÷ 544 ≈ 13.4%。</p>
+<div class="callout">
+  <div class="bold">🔑 三個提醒</div>
+  <ul>
+    <li><strong>時間就是錢：</strong> 每晚一個月賣，純益約少 3 萬（月付中的利息部分）、IRR 約降 0.4 到 0.7 個百分點。</li>
+    <li><strong>交屋雜費與家人利息共 47 萬很傷：</strong> 其中只有 10 萬能抵稅，淨吃掉純益約 42 萬，超過純益的一半。以 2027/3 賣出計，若沒有這 47 萬 IRR 約 11%，加上後掉到 7%。</li>
+    <li><strong>槓桿是雙面刃：</strong> IRR 的分母只有自有出資 544 萬，1,268 萬的房貸同時放大報酬與風險。掛售期間房價若回檔，虧損也同幅放大，這是「不追高價、快速成交」的另一個理由。</li>
+  </ul>
+</div>
+
+<h3>5. 保本價：賣多少才不賠</h3>
+<p><strong>定義：</strong> 純益 = 0，即賣出淨額扣掉家人利息與交屋雜費後，剛好收回 544 萬自有出資與已繳月付。以 2027/3 賣出為基準：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>賣價（萬）</th><th>房地合一稅</th><th>純益</th><th>年化 IRR</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>2,100</td><td>102.6</td><td>+73</td><td>7.0%</td></tr>
+    <tr><td>2,050</td><td>80.1</td><td>+45</td><td>4.4%</td></tr>
+    <tr><td>2,000</td><td>57.6</td><td>+18</td><td>1.8%</td></tr>
+    <tr><td><strong>1,967</strong></td><td>42.8</td><td><strong>0</strong></td><td>0.0%</td></tr>
+    <tr><td>1,950</td><td>35.1</td><td class="neg">−10</td><td class="neg">−1.0%</td></tr>
+    <tr><td>1,900</td><td>12.6</td><td class="neg">−37</td><td class="neg">−3.9%</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note">📎 <strong>降價的痛比想像中小：</strong> 每降價 1 萬，房地合一稅就少 0.45 萬，純益只少 0.55 萬。所以 73 萬的純益可以承受 133 萬的降價，保本價 1,967 萬比市值低 6.3%。</div>
+<p>保本價隨賣出月份上升，每晚一個月約增加 5.7 萬（每月約 3.1 萬利息 ÷ 0.55；本金部分會從較低的貸款餘額拿回，不是成本）：</p>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>賣出月份</th><th>保本價</th><th>較 2,100 低</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>2027/1</td><td>1,956</td><td>144（−6.9%）</td></tr>
+    <tr><td><strong>2027/3</strong></td><td><strong>1,967</strong></td><td>133（−6.3%）</td></tr>
+    <tr><td>2027/6</td><td>1,985</td><td>115（−5.5%）</td></tr>
+    <tr><td>2027/12</td><td>2,019</td><td>81（−3.9%）</td></tr>
   </tbody>
 </table>
 </div>
 <div class="callout">
-  <div class="bold">🔑 兩個提醒</div>
-  <p><strong>槓桿同時放大報酬與風險：</strong> IRR 的分母只有自有出資 544 萬，1,268 萬房貸的槓桿把年化報酬墊到約 11%；反面是房價一旦下跌，虧損也被同幅放大。<br>
-  <strong>IRR 同樣支持「早賣」：</strong> 這個 11.4% 是「交屋即賣」的上限；每多拖一個月，就多付一個月房貸、賣款也晚一個月回收，把 IRR 往下拉（拖到 2027/7 才賣約 7.8%，越拖越低）——與第二節結論一致。</p>
+  <div class="bold">🔑 掛售底線</div>
+  <p>2027/3 成交的底線是 <strong>1,967 萬</strong>，低於此價整筆投資倒賠。底線會隨時間往上爬，拖到 2027/12 時升到 2,019 萬，降價空間從 133 萬縮到 81 萬。這是「寧可早一點、便宜一點成交」的量化依據。</p>
 </div>
 
-<h2>🚦 五、結論與行動建議</h2>
-<ul>
-  <li><strong>時機：</strong> 交屋後即以合理價掛售，不為稅率階梯拖延。<strong>速度 &gt; 稅率</strong>——每拖一年，利息燒掉的都比省下的稅多。</li>
-  <li><strong>不追高價：</strong> 以合理價快速成交，別為多賣一點而拖著——空置等買方期間，每月仍在燒約 2.8 萬利息。</li>
-  <li><strong>稅務：</strong> 交屋前先請地政士確認持有期起算、土地漲價總數額與可列舉費用，把 45% 的實際稅額壓低（本表未計土增可扣抵，實際稅額可能更低，更強化「早賣」結論）。</li>
-  <li><strong>自住免稅也救不回：</strong> 即使符合自住滿 6 年免稅，仍因自扛 6 年利息（約 191 萬、純現金淨虧 84 萬）＋延後回填 B 貸而不划算（見第三節）——除非本來就打算把 C 當長期自住家。</li>
-</ul>
-<div class="alert-callout">
-  <div class="bold">⚠️ 這是「純財務」視角，人生變數可以推翻它</div>
-  <p>以上假設 C 一定會賣。若與女友的居住規劃尚未明朗、C 仍有「可能自住／保留彈性」的價值，那份<strong>選擇權</strong>不在本模型內。財務上早賣最優；但「不可逆的賣出 vs 保留彈性」屬人生決策，應優先於這張表——詳見 FIRE 規劃報告的整體取捨。</p>
-</div>
-
-<h2>📌 六、假設與注意事項</h2>
+<h2>🚦 六、行動清單</h2>
 <ol>
-  <li><strong>利息拆解：</strong> 依 1,268 萬、月付 51,500、年利率 2.7%、30 年本息攤還（無寬限期）逐月拆分本息，為本報告最不依賴假設的核心。</li>
-  <li><strong>本金非成本：</strong> 已還本金會在賣出時透過較低貸餘、較高淨入袋原封拿回，故持有成本只計利息。</li>
-  <li><strong>房地合一稅：</strong> 以增值扣仲介費（50 萬）後乘稅率估算，代書雜費（6 萬）與土地漲價總數額皆未列扣抵（故為保守上限，口徑與 FIRE 報告一致）；持有期起算依成屋登記，實際認定請洽專業人士。</li>
-  <li><strong>自住優惠要件：</strong> 本人（或配偶、未成年子女）設籍並實際居住連續滿 6 年、期間未出租或營業、6 年內未用過本優惠；本案課稅所得約 354 萬 &lt; 400 萬免稅額故全免。要件嚴格且與「非自住、女友不住」的前提衝突，僅供對照。</li>
-  <li><strong>不採用股市報酬假設：</strong> 因賣款用於回填 B 房貸而非投資，本報告刻意不以 0050／8% 等報酬估算，結論僅建立在利息與稅額上。</li>
-  <li><strong>投報率（IRR）：</strong> 第四節以 7 筆自備款／工程款的實際投入時點與賣出淨入袋（約 669 萬）計算資金加權年化報酬（XIRR），全程僅用真實金流、不含股市報酬假設；淨入袋拆解與 FIRE 報告一致（仲介 50 萬、代書雜費 6 萬）。</li>
-  <li>本報告數字單位皆為「萬（新台幣）」。</li>
+  <li><strong>貸款：</strong> 簽 2b。撥款前向銀行索取儲蓄險的解約金表，並確認保單是「撥款前提」還是「貸款期間須維持」。</li>
+  <li><strong>稅務：</strong> 交屋前請地政士確認三件事：交屋雜費 25 萬中契稅、印花稅、代書費、規費可列入取得成本的實際金額（本報告預設 10 萬，預繳管理費不可）、土地漲價總數額可扣抵金額、預估的土地增值稅。核算金額每與預設差 10 萬，稅差 4.5 萬、保本價差約 8 萬。</li>
+  <li><strong>出售：</strong> 交屋後立即以合理價掛售，不為多賣一點拖延。空置每月約 3.2 萬利息加管理費與稅捐。掛售底線見第五節 5：2027/3 賣出的保本價約 1,967 萬，每晚一個月上升約 6 萬。</li>
+  <li><strong>家人借款：</strong> 貸款確認、順利交屋後，償還 Mom 剩餘本金 110 萬與利息 20 萬（共 130 萬）。這筆在賣款入帳前就要付出，連同交屋後前 3 期月付約 16 萬，交屋前先確認現金足夠。</li>
+  <li><strong>申報：</strong> 完成所有權移轉登記之次日起 30 日內申報並繳納房地合一稅。</li>
+  <li><strong>稅款保留：</strong> 成交款入帳時先保留約 103 萬作為房地合一稅，申報繳納後餘額約 680 萬才是可自由運用的淨額。</li>
+  <li><strong>保單去留：</strong> 房子賣掉後，依第四節決定解約或繳滿。</li>
 </ol>
+
+<h2>📌 七、假設與注意事項</h2>
+<ul>
+  <li><strong>利息拆解：</strong> 1,268 萬、30 年本息平均攤還、無寬限期，依 2.6% / 3.0% 逐月拆分本息。</li>
+  <li><strong>違約金：</strong> 第一年以清償餘額 × 2% 計算，第二、三年的遞減比率為假設，請以合約為準。</li>
+  <li><strong>儲蓄險：</strong> 本金視為原定儲蓄、不計成本；報酬差距以 0 到 7.5 萬列示供參考；解約金率為一般行情假設，請以保單條款為準。</li>
+  <li><strong>房地合一稅：</strong> 增值扣仲介費 50 萬與交屋雜費中列入取得成本的 10 萬後乘 45%；代書雜費與土地漲價總數額未扣抵。持有期自成屋登記起算，兩年內賣出皆適用 45%。</li>
+  <li><strong>土地增值稅：</strong> 賣方負擔、依公告土地現值漲幅計算，持有不到一年通常僅數萬元，本報告未列；其漲價總數額可自房地合一課稅所得扣除，兩者大致互抵，請地政士一併試算。</li>
+  <li><strong>自有出資：</strong> 544 萬中有部分以家人借款支應：Martin 100 萬（2025/09）、Mom 130 萬（2026/01，已還 20 萬，餘 110 萬交屋後償還）。本報告視同自有資金、本金償還不計入純益，只把利息計為成本。</li>
+  <li><strong>交屋雜費與家人利息：</strong> 交屋雜費 25 萬（含契稅、印花稅、代書費、規費、預繳管理費）已於 2026/05 支付，預設其中 10 萬列入取得成本、其餘 15 萬不可抵扣；家人借款利息 22 萬（Martin 2 萬 2026/11 已付、Mom 20 萬交屋後支付）不可抵扣。47 萬皆計入純益與 IRR。</li>
+  <li><strong>IRR：</strong> 以 7 筆自備款／工程款實際投入時點、交屋雜費與家人借款利息、交屋後月付、賣出淨額計算（XIRR），全程只用真實金流。</li>
+  <li><strong>保本價：</strong> 以純益 = 0 定義，仲介費固定 50 萬；若仲介費改按成交價 2.4% 計，保本價再低約 3 萬，可忽略。</li>
+  <li>本報告數字單位皆為「萬（新台幣）」，匯率以 32 計。</li>
+</ul>
 
 <h2>🧾 附錄：驗算程式（Python）</h2>
 <details>
   <summary>展開驗算程式碼</summary>
 <pre>W = 10000
-loan0, rm, pay = 1268*W, 0.027/12, 51500      # 貸款 / 月利率 / 月付
-fee, misc = 50, 6                             # 仲介費 / 代書雜費(萬)
+loan0, N = 1268*W, 360                       # 貸款本金 / 期數
+fee, misc = 50, 6                            # 仲介費 / 代書雜費(萬)
+handover_misc, deduct = 25, 10               # 交屋雜費(2026/05 已付) / 其中可列入取得成本的部分(萬)
+family_int = (2, 20)                         # 家人借款利息(萬)：Martin(2026/11 已付)、Mom(交屋後付)，不可抵稅
+FX = 32                                      # 台幣/美元
 
-def amort(months):                            # 逐月拆本息
-    b, ci, cp = loan0, 0, 0
+def pmt(r):                                  # 本息平均攤還月付
+    rm = r/12; return loan0*rm/(1-(1+rm)**-N)
+def amort(r, months):                        # 逐月拆本息
+    rm, p, b, ci = r/12, pmt(r), loan0, 0
     for _ in range(months):
-        i = b*rm; p = pay - i                 # 當月利息 / 本金
-        ci += i; cp += p; b -= p
-    return ci, cp, b                          # 累計利息, 累計本金, 期末餘額
+        i = b*rm; ci += i; b -= (p - i)
+    return ci/W, b/W                         # 累計利息, 期末餘額(萬)
 
-rate = {0:0.45, 2:0.35, 5:0.20, 10:0.15}      # 持有 T 年後賣出適用稅率
-def tax(T):                                   # 房地合一稅(萬)：(增值−仲介)×稅率
-    mkt = 2100 * 1.009**T                     # 市值年增約 0.9%
-    return (mkt - 1812 - fee) * rate[T]
-for T in [2, 5, 10]:
-    ci, cp, b = amort(T*12)
-    saved, burn = round(tax(0) - tax(T)), round(ci/W)   # 省下的稅 / 燒掉的利息
-    print("多持有%2d年: 省稅%+d萬, 燒利息-%d萬 -> 淨 %d萬"
-          % (T, saved, burn, saved - burn))
-# 多持有 2年: 省稅+11萬, 燒利息-67萬  -> 淨  -56萬
-# 多持有 5年: 省稅+40萬, 燒利息-162萬 -> 淨 -122萬
-# 多持有10年: 省稅+42萬, 燒利息-302萬 -> 淨 -260萬
+print("月付  2a(2.6%%)=%.0f  2b(3.0%%)=%.0f" % (pmt(0.026), pmt(0.03)))
+print("第1個月利息 2b = %.2f 萬" % (loan0*0.03/12/W))
+print("年利差 = %.2f 萬, 月利差 = %.2f 萬" % (1268*0.004, 1268*0.004/12))
+# 月付 2a=50763 2b=53459 / 第1個月利息 3.17 萬 / 年利差 5.07 萬, 月利差 0.42 萬
 
-# ---- 特例：自住滿6年（免稅額400萬、超過10%）----
-mkt6 = 2100*W * (1.009**6)                    # 6年後市值
-ci6, cp6, b6 = amort(72)
-taxable6 = (mkt6 - 1812*W) - fee*W           # 課稅所得(扣仲介)
-tax_self = max(0, taxable6 - 400*W) * 0.10    # 自住優惠
-print("自住6年: 課稅所得%.0f萬(<400免稅) 稅%.0f萬 淨入袋%.0f萬 但自扛利息%.0f萬"
-      % (taxable6/W, tax_self/W, (mkt6-b6-(fee+misc)*W-tax_self)/W, ci6/W))
-# 自住6年: 課稅所得354萬(<400免稅) 稅0萬 淨入袋1071萬 但自扛利息191萬
+# ---- 1. 兩案總成本（交屋後 m 個月賣出；違約金×餘額，第 1 年 2%，第 2/3 年假設 1.5%/1%）----
+rate = lambda m: 0.02 if m &lt;= 12 else 0.015 if m &lt;= 24 else 0.01
+print("\n賣出 | 違約金率 | 2a利息 違約金 合計 | 2b利息 | 2b省(產品0) 2b省(產品5)")
+for m in (3, 6, 9, 12, 18, 24, 30, 36):
+    ia, ba = amort(0.026, m); ib, _ = amort(0.03, m)
+    pen = ba*rate(m)
+    print("%2d月 | %4.1f%% | %5.1f %5.1f %5.1f | %5.1f | %5.1f %5.1f"
+          % (m, rate(m)*100, ia, pen, ia+pen, ib, ia+pen-ib, ia+pen-ib-5))
+#  3月 | 2.0% |  8.2 25.2  33.4 |   9.5 | 24.0 19.0
+#  6月 | 2.0% | 16.4 25.1  41.5 |  18.9 | 22.5 17.5
+#  9月 | 2.0% | 24.5 24.9  49.5 |  28.3 | 21.1 16.1
+# 12月 | 2.0% | 32.6 24.8  57.4 |  37.7 | 19.7 14.7
+# 18月 | 1.5% | 48.7 18.4  67.1 |  56.2 | 10.8  5.8
+# 24月 | 1.5% | 64.5 18.2  82.7 |  74.6 |  8.1  3.1
+# 30月 | 1.0% | 80.2 12.0  92.1 |  92.7 | -0.5 -5.5
+# 36月 | 1.0% | 95.6 11.8 107.5 | 110.6 | -3.1 -8.1
 
-# ---- 附錄 IRR：C 房賣出的年化報酬（XIRR，只用真實金流、無股市報酬假設）----
+# ---- 2. 儲蓄險：3000 USD × 6 年，到期 18,017 USD ----
+flows = [(k, -3000) for k in range(6)] + [(6, 18017)]
+npv = lambda r: sum(cf/(1+r)**t for t, cf in flows)
+lo, hi = -0.01, 0.05
+for _ in range(100):
+    m = (lo+hi)/2; lo, hi = (m, hi) if npv(m) > 0 else (lo, m)
+print("\n儲蓄險 IRR ≈ %.3f%%" % (lo*100))                       # 0.027%
+for r in (0.0, 0.016, 0.035):
+    opp = sum(3000*((1+r)**(6-k)-1) for k in range(6))
+    print("相對年報酬 %.2f%% 的存法, 6年少賺 %4.0f USD ≈ %.1f 萬" % (r*100, opp, opp*FX/W))
+# 0% → 0 / 1.6% → 3.3 / 3.5% → 7.5 萬
+print("到期 18,017 USD ≈ %.1f 萬; 匯率 ±5%% ≈ ±%.1f 萬" % (18017*FX/W, 18017*FX*0.05/W))
+for sv in (0.6, 0.75):
+    print("繳1年後解約(解約金率%.0f%%) 損失 ≈ %.1f 萬" % (sv*100, 3000*(1-sv)*FX/W))
+# 57.7 萬, ±2.9 萬 / 解約金率 60% 損 3.8 萬, 75% 損 2.4 萬
+
+# ---- 3. 賣出淨額與年化 IRR（2b 貸款、45% 稅）----
+def tax_at(P): return max(0, (P - 1812 - deduct - fee) * 0.45)  # 取得成本加計可列入的 10 萬
+tax0 = tax_at(2100)
+print("\n房地合一稅: (2100 − 1812 − %d − %d) × 45%% = %.1f 萬" % (deduct, fee, tax0))   # 102.6 萬
 invest = [(0.00,-182),(1.17,-36),(1.50,-35),(1.92,-36),
-          (2.17,-37),(2.25,-181),(2.84,-37)]     # (投入年, 現金流萬)；2023/10 起算
-def xirr(flows):
-    npv = lambda r: sum(cf/(1+r)**t for t,cf in flows)
-    lo, hi = 0.0, 1.0                             # 二分法求 IRR
-    for _ in range(100):
-        m = (lo+hi)/2
-        lo, hi = (m, hi) if npv(m) > 0 else (lo, m)
+          (2.17,-37),(2.84,-37),(3.08,-181)]                    # 2023/10 起算(年)；181 萬於 2026/11
+def xirr(fl):
+    f = lambda r: sum(cf/(1+r)**t for t, cf in fl)
+    lo, hi = -0.5, 1.0
+    for _ in range(200):
+        m = (lo+hi)/2; lo, hi = (m, hi) if f(m) > 0 else (lo, m)
     return (lo+hi)/2
-net = 2100 - 1268 - fee - misc - tax(0)           # 2027/1 賣出淨入袋
-flows = invest + [(3.25, net)]
-cash_in = -sum(cf for t,cf in invest)             # 自有出資 544
-profit  = sum(cf for t,cf in flows)               # 純益
-print("自有出資%.0f萬 淨入袋%.0f萬 純益%.0f萬 純益率%.1f%% 年化IRR%.1f%%"
-      % (cash_in, net, profit, profit/cash_in*100, xirr(flows)*100))
-# 自有出資544萬 淨入袋669萬 純益125萬 純益率23.0% 年化IRR11.4%
+t_misc, t_martin, t0 = 2.58, 3.08, 3.17                         # 2026/05 交屋雜費, 2026/11 Martin 利息, 2026/12 交屋並付 Mom 利息
+def flows_at(P, k):                                             # 賣價 P、交屋後 k 個月賣出的全部現金流
+    _, b = amort(0.03, k); net = P - b - fee - misc - tax_at(P)
+    return (invest + [(t_misc, -handover_misc), (t_martin, -family_int[0]), (t0, -family_int[1])]
+            + [(t0 + j/12, -pmt(0.03)/W) for j in range(k)] + [(t0 + k/12, net)]), net
+print("\n賣出月份 | 貸款餘額 | 賣出淨額 | 淨回收 | 已付月付 | 純益 | 年化IRR")
+for k, label in ((1, "2027/1"), (3, "2027/3"), (6, "2027/6"), (12, "2027/12")):
+    fl, net = flows_at(2100, k); _, b = amort(0.03, k)
+    print("%-8s | %6.1f | %5.1f | %5.1f | %5.1f | %5.1f | %.1f%%"
+          % (label, b, net, net-handover_misc-sum(family_int), k*pmt(0.03)/W,
+             sum(cf for _, cf in fl), xirr(fl)*100))
+# 2027/1  | 1265.8 | 675.6 | 628.6 |  5.3 | 79.2 | 8.4%
+# 2027/3  | 1261.5 | 679.9 | 632.9 | 16.0 | 72.9 | 7.0%   ← 基準情境
+# 2027/6  | 1254.9 | 686.5 | 639.5 | 32.1 | 63.5 | 5.3%
+# 2027/12 | 1241.5 | 699.9 | 652.9 | 64.2 | 44.7 | 3.0%
 
-# 拖到 2027/7 才賣：2027/1~6 自繳 6 期月付，賣時貸餘較低
-ci, cp, b = amort(6)
-late = invest + [(3.25+k/12, -pay/W) for k in range(6)] \
-              + [(3.75, 2100 - b/W - fee - misc - tax(0))]
-print("2027/7 賣出: 年化IRR%.1f%%" % (xirr(late)*100))
-# 2027/7 賣出: 年化IRR7.8%</pre>
+# ---- 4. 保本價：純益 = 0 的賣價 ----
+profit_at = lambda P, k: sum(cf for _, cf in flows_at(P, k)[0])
+def solve(fn, lo=1500, hi=2300):                                # 二分法求 fn(P)=0 的 P
+    for _ in range(100):
+        m = (lo+hi)/2; lo, hi = (m, hi) if fn(m) &lt; 0 else (lo, m)
+    return (lo+hi)/2
+print("\n賣價 | 稅 | 純益 | IRR  (2027/3)")
+for P in (2100, 2050, 2000, 1967, 1950, 1900):
+    print("%d | %5.1f | %+6.1f | %+.1f%%" % (P, tax_at(P), profit_at(P, 3), xirr(flows_at(P, 3)[0])*100))
+print("\n賣出月份 | 保本價")
+for k, label in ((1, "2027/1"), (3, "2027/3"), (6, "2027/6"), (12, "2027/12")):
+    print("%-8s | %6.1f" % (label, solve(lambda P: profit_at(P, k))))
+# 2100 | 102.6 | +72.9 | +7.0% / 2050 | 80.1 | +45.4 | +4.4% / 2000 | 57.6 | +17.9 | +1.8%
+# 1967 |  42.8 |  -0.2 | -0.0% / 1950 | 35.1 |  -9.6 | -1.0% / 1900 | 12.6 | -37.1 | -3.9%
+# 保本價 2027/1 | 1955.9 / 2027/3 | 1967.4 / 2027/6 | 1984.6 / 2027/12 | 2018.7</pre>
 </details>
