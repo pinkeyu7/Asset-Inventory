@@ -39,10 +39,7 @@ condense: ## 就地濃縮 source.plist（自動備份 .bak；智慧預設：6 �
 	$(PYTHON) tools/condense.py --in-place
 
 update: condense ## 月更一鍵：就地濃縮 source.plist → 轉 CSV → 開啟本機預覽
-	$(PYTHON) tools/convert.py
-	$(NODE) tools/make_preview.js
-	@command -v open >/dev/null 2>&1 && open preview/index.html \
-		|| echo "→ 請用瀏覽器開啟 preview/index.html"
+	@$(MAKE) --no-print-directory preview
 
 test: ## 執行 Ledger 單元測試
 	$(NODE) --test

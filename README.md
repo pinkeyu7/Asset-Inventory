@@ -83,9 +83,10 @@ plist 以 **UTC（`Z`）** 儲存日期，但本人在 **+8**。兩個產生「�
 
 ## 資料前處理（可選）
 
-`import_data/source.plist` 可先經兩支獨立的 plist→plist 工具整理，再交給 `convert.py`。兩者皆
-**不動原始檔**（輸出成新檔），且都內建**會計恆等式驗證**，確保處理前後淨值不變。都是純資料整理、
-與部署流程無關，故未收進 `Makefile`，直接以 `python3` 執行。
+`import_data/source.plist` 可先經兩支獨立的 plist→plist 工具整理，再交給 `convert.py`。兩者都內建
+**會計恆等式驗證**，確保處理前後淨值不變。`reclassify.py` 是一次性工具，輸出成新檔、不動原始檔，直接以
+`python3` 執行；`condense.py` 屬月更流程，已收進 `Makefile`（`make condense`／`make update`），
+就地覆蓋 `source.plist` 並先備份為 `source.plist.bak`。
 
 ### 1. 重分類 `tools/reclassify.py`（一次性）
 
@@ -104,7 +105,7 @@ python3 tools/reclassify.py            # source.plist → source.reclassified.pl
 把指定支出科目的瑣碎交易，依 (Account1, Account2, 期間) 分組加總成一筆，壓縮多年累積的細碎紀錄。
 借貸方向與金額總和皆保留，故各帳戶餘額與對應顆粒度的統計（年報／月趨勢）仍成立。
 
-**月更用途（推薦，就地覆蓋）**：不帶任何參數即用智慧預設——來源 `source.plist`、經常性 6 科目、
+**月更用途（推薦，就地覆蓋）**：不帶科目／年份參數即用智慧預設——來源 `source.plist`、經常性 6 科目、
 年份**依當年自動判斷**（往年逐年、當年逐月，跨年自動生效不用改參數）。搭配 `make update` 一鍵跑完：
 
 ```bash
@@ -118,6 +119,7 @@ make condense    # 只就地濃縮 source.plist（= python3 tools/condense.py --
 >
 > 反覆濃縮為何安全：分組保留借貸方向與金額，恆等式（A−L 與 I−E 兩邊）於**寫檔前**把關，不過即中止不覆寫；
 > 且既有彙總筆的「（N 筆）」計數會被**讀出累加**（非歸零），故金額與計數都不會因每月重複濃縮而失真。
+> 已是濃縮後狀態（如連跑兩次 `make update`）時不寫檔也不備份，`.bak` 保留的仍是上一次濃縮前的明細。
 
 **自訂**（需要時仍可覆寫預設；不加 `--in-place` 則寫到 `--out`、不動來源）：
 
@@ -231,10 +233,10 @@ make test            # = node --test（執行 tests/ledger.test.js）
 
 | 路徑 | 說明 |
 |------|------|
-| `Makefile` | 常用指令入口（`make` 列出：convert/preview/test/push/deploy…） |
-| `import_data/source.plist` | 記帳 App 匯出的原始檔（不會被修改） |
+| `Makefile` | 常用指令入口（`make` 列出：convert/condense/update/preview/test/push/release…） |
+| `import_data/source.plist` | 記帳 App 匯出檔；`make condense`／`make update` 會就地濃縮（先備份為 `source.plist.bak`） |
 | `tools/reclassify.py` | 前處理（可選）：支出科目 26→14 合併，plist→plist，含恆等式驗證 |
-| `tools/condense.py` | 前處理（可選）：瑣碎交易依 (科目×期間) 濃縮，plist→plist，含恆等式驗證 |
+| `tools/condense.py` | 月更：瑣碎交易依 (科目×期間) 濃縮，plist→plist（`make condense` 就地覆蓋並備份 `.bak`），含恆等式驗證 |
 | `tools/convert.py` | plist → CSV，含恆等式驗證 |
 | `tools/make_preview.js` | 產生本機預覽 `preview/index.html` |
 | `data/*.csv` | 匯入 Google Sheet 用的資料 |

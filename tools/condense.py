@@ -11,18 +11,20 @@
 且因採「年/月」為期間，對應顆粒度的統計（年報 / 月趨勢）仍成立。
 
 用法：
-    # 月更（推薦）：不帶任何參數即用智慧預設——來源 source.plist、經常性 6 科目、年份依當年自動判斷
-    python3 tools/condense.py
-    # 或用 Makefile 一鍵：make update（濃縮 → 轉 CSV → 開啟本機預覽）
+    # 月更（推薦）：make update（就地濃縮 source.plist → 轉 CSV → 開啟本機預覽）
+    # 只濃縮：智慧預設——經常性 6 科目、年份依當年自動判斷；先備份 .bak 再寫回 source.plist
+    python3 tools/condense.py --in-place
 
-    # 需要時仍可自訂：
+    # 需要時仍可自訂（不加 --in-place 則寫到 --out、不動來源）：
     python3 tools/condense.py [科目名 ...] [--yearly-before N] [--monthly Y ...]
-                              [--src 來源plist] [--out 輸出plist]
+                              [--src 來源plist] [--out 輸出plist] [--in-place]
 預設（皆可覆寫）：
-    來源   = import_data/source.plist          （保持 raw；每月從 App 重新匯出覆蓋它）
-    輸出   = import_data/source.condensed.plist
+    來源   = import_data/source.plist          （歷史彙總 + 當月新明細的累積檔）
+    輸出   = 加 --in-place 時寫回來源；否則 import_data/source.condensed.plist
     科目   = 固定週期費、保險、日常生活、交通移動、健康醫療、進修教育
     年份   = 當年（不含）以前逐年、當年逐月——跨年自動生效，不用每年改參數
+
+--in-place 時若已是濃縮後狀態（如連跑兩次），不寫檔也不備份，.bak 保留上一次濃縮前的明細。
 """
 import plistlib, os, sys, argparse, collections, datetime, re, shutil
 
@@ -49,7 +51,7 @@ def parse_args():
                    help="來源 plist；預設 import_data/source.plist")
     p.add_argument("--out", default=os.path.join(ROOT, "import_data", "source.condensed.plist"))
     p.add_argument("--in-place", action="store_true",
-                   help="就地濃縮：先備份 --src 為 .bak，恆等式通過後把結果寫回 --src（月更工作流 A）")
+                   help="就地濃縮：先備份 --src 為 .bak，恆等式通過後把結果寫回 --src；無可濃縮時不寫檔也不備份")
     p.add_argument("--yearly-before", type=int, default=THIS_YEAR,
                    help="此年（不含）以前 → 每年濃縮一筆；預設『當年』（往年逐年）")
     p.add_argument("--monthly", type=int, nargs="*", default=None,
@@ -131,6 +133,12 @@ def main():
 
     new_txns = kept + condensed
     new_txns.sort(key=lambda t: t["Date"])   # 依時間排序，維持帳本可讀性
+
+    # 已是濃縮後狀態就不動任何檔；否則 --in-place 的 .bak 會被濃縮版覆蓋，濃縮前的明細就沒了
+    if args.in_place and new_txns == txns:
+        print(f"來源：{args.src}")
+        print("已是濃縮後狀態，無可濃縮的交易；未寫檔、未備份（.bak 保持不變）。")
+        return
     data["MainData"] = new_txns
 
     # ── 寫檔前先驗會計恆等式（濃縮前後 A-L 與 I-E 兩邊都須一致）；不過就中止、不寫任何檔 ──
